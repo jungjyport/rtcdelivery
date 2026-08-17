@@ -1,0 +1,117 @@
+{
+  "common": {
+    "home": "ホーム",
+    "search": "検索",
+    "login": "ログイン",
+    "signup": "会員登録",
+    "logout": "ログアウト",
+    "findRestaurants": "グルメ検索",
+    "orderHistory": "注文履歴",
+    "order": "注文する",
+    "liveTracking": "リアルタイム配達追跡",
+    "appDownload": "アプリダウンロード"
+  },
+  "nav": {
+    "home": "ホーム",
+    "findRestaurants": "グルメ検索",
+    "orderHistory": "注文履歴"
+  },
+  "hero": {
+    "badge": "リアルタイム注文 · スピード配達",
+    "heading1": "今日は何食べる？",
+    "heading2": "おいしい一食をお届けします",
+    "description": "人気のグルメから新しくオープンしたレストランまで、{br}リアルタイムで注文してすぐに受け取りましょう。",
+    "searchPlaceholder": "料理やレストランを検索",
+    "stats": {
+      "restaurants": "提携レストラン",
+      "avgDelivery": "平均配達時間",
+      "avgDeliveryValue": "28分",
+      "satisfaction": "平均満足度"
+    }
+  },
+  "category": {
+    "title": "カテゴリー別グルメ探索",
+    "subtitle": "食べたい料理のジャンルを選んでください",
+    "korean": "韓国料理",
+    "chinese": "中華料理",
+    "japanese": "日本料理",
+    "western": "洋食",
+    "chicken": "チキン",
+    "pizza": "ピザ",
+    "burger": "バーガー",
+    "snack": "軽食",
+    "cafe": "カフェ",
+    "dessert": "デザート",
+    "lateNight": "夜食",
+    "healthy": "ヘルシー"
+  },
+  "feature": {
+    "title": "なぜRTC Deliveryなのか？",
+    "subtitle": "もっと速く、もっとおいしく、もっと便利に",
+    "realtime": {
+      "title": "リアルタイム注文追跡",
+      "description": "注文受付から配達完了まで、すべてのプロセスをリアルタイムで確認できます。"
+    },
+    "fast": {
+      "title": "超高速配達",
+      "description": "最適化された配達システムで、平均28分以内に温かい料理をお届けします。"
+    },
+    "secure": {
+      "title": "安全な決済",
+      "description": "PCI DSS認証の決済システムで安心してお支払いいただけます。多様な決済方法に対応しています。"
+    }
+  },
+  "cta": {
+    "title": "今すぐ始めましょう！",
+    "description": "初回注文で配達料無料 + 3,000ウォン割引クーポンプレゼント",
+    "orderNow": "注文する →",
+    "appDownload": "アプリダウンロード"
+  },
+  "footer": {
+    "description": "Real Time Commerceベースの{br}フードデリバリーサービス",
+    "service": "サービス",
+    "findRestaurants": "グルメ検索",
+    "order": "注文する",
+    "liveTracking": "リアルタイム配達追跡",
+    "support": "カスタマーサポート",
+    "faq": "よくある質問",
+    "contactCenter": "お問い合わせ",
+    "partnership": "提携のお問い合わせ",
+    "legal": "法的事項",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "businessInfo": "事業者情報",
+    "copyright": "© 2026 RTC Delivery. All rights reserved."
+  },
+  "seo": {
+    "title": "RTC Delivery - リアルタイムフードデリバリー",
+    "description": "人気のグルメからリアルタイムで注文して、すぐにお届け。Real Time Commerce方式のフードデリバリーサービス。"
+  },
+  "locale": {
+    "ko": "한국어",
+    "ja": "日本語"
+  },
+  "order": {
+    "status": {
+      "PENDING": "注文待ち",
+      "ACCEPTED": "注文受付",
+      "PREPARING": "調理中",
+      "READY": "調理完了",
+      "DELIVERING": "配達中",
+      "DELIVERED": "配達完了",
+      "CANCELLED": "注文キャンセル"
+    }
+  },
+  "error": {
+    "RESTAURANT_NOT_FOUND": "店舗が見つかりません。",
+    "MENU_NOT_FOUND": "メニューが見つかりません。",
+    "ORDER_NOT_FOUND": "注文が見つかりません。",
+    "PAYMENT_FAILED": "決済に失敗しました。",
+    "UNAUTHORIZED": "ログインが必要です。",
+    "FORBIDDEN": "アクセス権限がありません。",
+    "INTERNAL_SERVER_ERROR": "サーバーエラーが発生しました。",
+    "VALIDATION_ERROR": "入力内容をご確認ください。",
+    "DUPLICATE_EMAIL": "すでに使用されているメールアドレスです。",
+    "INVALID_CREDENTIALS": "メールアドレスまたはパスワードが正しくありません。"
+  }
+}

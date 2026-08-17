@@ -1,0 +1,117 @@
+{
+  "common": {
+    "home": "홈",
+    "search": "검색",
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃",
+    "findRestaurants": "맛집 찾기",
+    "orderHistory": "주문내역",
+    "order": "주문하기",
+    "liveTracking": "실시간 배달 추적",
+    "appDownload": "앱 다운로드"
+  },
+  "nav": {
+    "home": "홈",
+    "findRestaurants": "맛집 찾기",
+    "orderHistory": "주문내역"
+  },
+  "hero": {
+    "badge": "실시간 주문 · 빠른 배달",
+    "heading1": "오늘 뭐 먹지?",
+    "heading2": "맛있는 한 끼를 배달합니다",
+    "description": "주변 인기 맛집부터 새로 오픈한 레스토랑까지,{br}실시간으로 주문하고 빠르게 받아보세요.",
+    "searchPlaceholder": "음식이나 레스토랑을 검색하세요",
+    "stats": {
+      "restaurants": "제휴 레스토랑",
+      "avgDelivery": "평균 배달 시간",
+      "avgDeliveryValue": "28분",
+      "satisfaction": "평균 만족도"
+    }
+  },
+  "category": {
+    "title": "카테고리별 맛집 탐색",
+    "subtitle": "원하는 음식 종류를 선택해보세요",
+    "korean": "한식",
+    "chinese": "중식",
+    "japanese": "일식",
+    "western": "양식",
+    "chicken": "치킨",
+    "pizza": "피자",
+    "burger": "버거",
+    "snack": "분식",
+    "cafe": "카페",
+    "dessert": "디저트",
+    "lateNight": "야식",
+    "healthy": "건강식"
+  },
+  "feature": {
+    "title": "왜 RTC Delivery인가요?",
+    "subtitle": "더 빠르고, 더 맛있고, 더 편리하게",
+    "realtime": {
+      "title": "실시간 주문 추적",
+      "description": "주문 접수부터 배달 완료까지, 모든 과정을 실시간으로 확인할 수 있어요."
+    },
+    "fast": {
+      "title": "초고속 배달",
+      "description": "최적화된 배달 시스템으로 평균 28분 안에 따뜻한 음식을 받아보세요."
+    },
+    "secure": {
+      "title": "안전한 결제",
+      "description": "PCI DSS 인증 결제 시스템으로 안심하고 결제하세요. 다양한 결제 수단을 지원합니다."
+    }
+  },
+  "cta": {
+    "title": "지금 바로 시작하세요!",
+    "description": "첫 주문 시 배달비 무료 + 3,000원 할인 쿠폰을 드려요",
+    "orderNow": "주문하러 가기 →",
+    "appDownload": "앱 다운로드"
+  },
+  "footer": {
+    "description": "Real Time Commerce 기반의{br}음식 주문 & 딜리버리 서비스",
+    "service": "서비스",
+    "findRestaurants": "맛집 찾기",
+    "order": "주문하기",
+    "liveTracking": "실시간 배달 추적",
+    "support": "고객지원",
+    "faq": "자주 묻는 질문",
+    "contactCenter": "고객센터",
+    "partnership": "제휴 문의",
+    "legal": "법적 고지",
+    "terms": "이용약관",
+    "privacy": "개인정보처리방침",
+    "businessInfo": "사업자정보",
+    "copyright": "© 2026 RTC Delivery. All rights reserved."
+  },
+  "seo": {
+    "title": "RTC Delivery - 실시간 음식 주문 & 딜리버리",
+    "description": "주변 인기 맛집에서 실시간으로 주문하고 빠르게 배달받으세요. Real Time Commerce 방식의 음식 주문 및 딜리버리 서비스."
+  },
+  "locale": {
+    "ko": "한국어",
+    "ja": "日本語"
+  },
+  "order": {
+    "status": {
+      "PENDING": "주문 대기",
+      "ACCEPTED": "주문 접수",
+      "PREPARING": "조리 중",
+      "READY": "조리 완료",
+      "DELIVERING": "배달 중",
+      "DELIVERED": "배달 완료",
+      "CANCELLED": "주문 취소"
+    }
+  },
+  "error": {
+    "RESTAURANT_NOT_FOUND": "음식점을 찾을 수 없습니다.",
+    "MENU_NOT_FOUND": "메뉴를 찾을 수 없습니다.",
+    "ORDER_NOT_FOUND": "주문을 찾을 수 없습니다.",
+    "PAYMENT_FAILED": "결제에 실패했습니다.",
+    "UNAUTHORIZED": "로그인이 필요합니다.",
+    "FORBIDDEN": "접근 권한이 없습니다.",
+    "INTERNAL_SERVER_ERROR": "서버 오류가 발생했습니다.",
+    "VALIDATION_ERROR": "입력값을 확인해 주세요.",
+    "DUPLICATE_EMAIL": "이미 사용 중인 이메일입니다.",
+    "INVALID_CREDENTIALS": "이메일 또는 비밀번호가 올바르지 않습니다."
+  }
+}
