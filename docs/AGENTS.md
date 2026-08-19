@@ -32,10 +32,12 @@ project-root/
 │   ├── AGENTS.md                    # 이 문서
 │   ├── architecture.md              # 아키텍처 헌법
 │   ├── api-conventions.md           # API 규약
-│   └── sdd-spec-docs/               # OpenAPI Spec 방식일 때만 사용 (2.2 참고)
+│   ├── tasks.md                     # 서비스별 작업 체크리스트 (진행 상태의 원천)
+│   └── sdd-spec-docs/
 │       └── feature/
-│           └── {service-name}/
-│               └── openapi.yaml
+│           └── {service-name}/      # 백엔드 서비스명 또는 프론트엔드 앱명
+│               ├── openapi.yaml     # OpenAPI 스펙일때만 존재함. Swagger라면 X
+│               └── {topic}-spec.md  # 계약/설계 스펙 문서 (프론트엔드 포함)
 ├── infra/                           # 인프라 초기화 스크립트 (DB init 등). 없을 수도 있음
 │   └── mysql/init/
 ├── docker/                          # Dockerfile 등 (없을 수도 있음)
@@ -198,7 +200,7 @@ Controller / DTO의 springdoc(Swagger) 어노테이션이 진실의 원천이다
 {
   "status": 200,
   "message": "Success",
-  "data": { }
+  "data": {}
 }
 ```
 
@@ -282,7 +284,7 @@ Controller / DTO의 springdoc(Swagger) 어노테이션이 진실의 원천이다
 - **Nuxt 4** (Vue 3, TypeScript, Nitro engine)
 - **Tailwind CSS** (유틸리티 클래스 기반 스타일링 필수, scoped `<style>` 블록 금지)
 - **Pinia** (상태 관리)
-- **Axios** (API 통신 — 기본적으로 Axios 사용. SSR이 필요한 컴포넌트라고 판단했을 경우 `useFetch` 혹은 `useAsyncData`로 Axios를 감싸서 사용한다.)
+- **Nuxt 내장 `$fetch` (ofetch)** (API 통신 — 별도 HTTP 클라이언트 라이브러리를 추가하지 않는다. axios 사용 금지.)
 - **@nuxtjs/i18n** (정적 UI · 에러 메시지 다국어)
 
 ### 5.2 디렉토리 구조
@@ -296,6 +298,7 @@ frontend/{frontend-app}/
 │   │   ├── common/                 # 공통 UI 컴포넌트
 │   │   └── {feature}/              # 기능별 컴포넌트 그룹
 │   ├── composables/
+│   │   ├── useApiFetch.ts          # useAsyncData + API Client 결합 (SSR)
 │   │   └── use{Feature}.ts         # 기능별 Composable (API 호출 + 상태)
 │   ├── layouts/
 │   │   ├── default.vue
@@ -303,11 +306,13 @@ frontend/{frontend-app}/
 │   ├── middleware/
 │   ├── pages/                      # 파일 기반 라우팅
 │   ├── plugins/
-│   │   └── api.ts                  # Axios 인스턴스 + 인터셉터 ($api)
+│   │   └── api.ts                  # API Client를 $api로 등록
 │   ├── stores/
 │   │   └── {feature}.ts            # Pinia 스토어
 │   ├── types/
+│   │   └── api.ts                  # ApiResponse / ApiError / ApiClient 타입
 │   └── utils/
+│       └── api-client.ts           # $fetch 래핑 + 토큰 갱신 큐
 ├── i18n/
 │   ├── i18n.config.ts
 │   └── locales/
@@ -326,13 +331,24 @@ frontend/{frontend-app}/
 
 ### 5.4 API 통신 규칙
 
-- **Axios 인스턴스**를 Nuxt 플러그인으로 등록하고 `useNuxtApp().$api`로 접근한다.
-- 요청 인터셉터: Access Token 자동 주입 (`Authorization: Bearer {token}`).
-- 응답 인터셉터: 401 응답 시 토큰 갱신 큐 패턴(Token Refresh Queue)을 적용하는 것을 목표로 한다.
-  - 갱신 중 다른 요청은 큐에 대기 → 갱신 성공 후 일괄 재시도.
-  - 갱신 실패 시 강제 로그아웃 및 로그인 페이지 리디렉트.
+- **HTTP 호출은 `$fetch`를 래핑한 자체 API Client 하나로만 한다.** `axios` 등 외부 HTTP 클라이언트를 추가하지 않으며, 컴포넌트에서 전역 `fetch` / `$fetch`를 직접 호출하지 않는다.
+- API Client는 `app/utils/api-client.ts`에 구현하고, `app/plugins/api.ts`가 이를 `$api`로 등록한다. 접근은 `useNuxtApp().$api`.
+- 요청 시 Access Token(`Authorization: Bearer {token}`)과 현재 locale(`Accept-Language`)을 자동 주입한다.
+- 401 응답 시 **토큰 갱신 큐(Token Refresh Queue)** 를 적용한다.
+  - 갱신은 single-flight로 **동시에 한 번만** 수행하고, 대기하던 요청은 갱신 완료 후 일괄 재시도한다.
+  - 재시도는 요청당 1회로 제한한다. 재시도가 다시 401이면 그대로 실패시킨다.
+  - `/auth/login`, `/auth/signup`, `/auth/refresh-token`의 401은 갱신 대상에서 제외한다.
+  - 갱신 실패 시 `clearAuth()` 후 로그인 페이지로 리디렉트한다.
+- **토큰 저장 위치**: Access Token은 Pinia 메모리에만 둔다(localStorage 금지). Refresh Token은 백엔드가 httpOnly 쿠키로 관리하며, 요청은 `credentials: 'include'`로 보낸다.
+- SSR 중에는 토큰 주입과 토큰 갱신을 하지 않는다. 인증이 필요한 데이터는 클라이언트에서 조회한다.
+- **인증 라우트 미들웨어**는 `import.meta.server`에서 즉시 반환하고, 판정 전에 `authStore.restoreSession()`을 `await`한다. 이를 지키지 않으면 로그인 사용자가 새로고침만으로 로그인 페이지로 튕긴다.
+- 전역 세션 복구(플러그인/`app.vue`)는 `await`하지 않는다. 대기는 인증이 필요한 라우트에서만 발생해야 한다.
+- 헤더 등 **개인화 UI는 `isLoggedIn` 단독으로 분기하지 않는다.** `isRestoring`(판정 중) → `isLoggedIn`(로그인) → 그 외(비로그인) 3단계로 렌더링해 복구 중 깜빡임을 막는다.
+- 백엔드 `ApiResponse<T>` 래퍼는 API Client가 자동으로 벗긴다. 호출부는 `T`만 다룬다.
+- 모든 실패는 `ApiError`(`status`, `code`, `data`)로 정규화되어 throw된다. 에러 코드는 `error.{CODE}` i18n 키로 매핑한다.
 - API Base URL은 `runtimeConfig.public.apiBaseUrl`로 관리하며, Gateway의 `/api/v1`을 가리킨다.
-- 백엔드 에러 코드(`response.data.message`)는 `error.{CODE}` i18n 키로 매핑한다.
+- SSR 프리페치가 필요하면 `useApiFetch`(내부적으로 `useAsyncData` + API Client)를 사용한다.
+- 상세 계약은 `docs/sdd-spec-docs/feature/nuxt-app/api-client-spec.md`를 따른다.
 
 ### 5.5 상태 관리 (Pinia)
 
@@ -349,16 +365,29 @@ frontend/{frontend-app}/
 
 ### 5.7 TypeScript 타입 관리
 
-- API 요청/응답 타입은 `types/{feature}.ts` 또는 `types/index.ts`에 정의한다.
+- API 요청/응답 타입은 `types/{feature}.ts` 또는 `types/index.ts`에 정의한다. API Client 자체의 타입(`ApiResponse`, `ApiError`, `ApiClient`)은 `types/api.ts`에 둔다.
 - 타입은 `interface` 또는 `type`으로 작성하고, 모든 API 호출 시 제네릭으로 적용한다.
+- 제네릭에는 **언랩된 타입**을 넣는다. `ApiResponse<T>`가 아니라 `T`다.
 
 ```typescript
-const response = await ($api as AxiosInstance).get<ApiResponse<ProductDetail>>(
-  `/restaurants/${id}`,
-)
+const { $api } = useNuxtApp()
+
+const restaurant = await $api.get<Restaurant>(`/restaurants/${id}`)
+
+const { data: restaurants } = await useApiFetch<Restaurant[]>('/restaurants')
 ```
 
-- `$api`의 `baseURL`이 이미 `/api/v1`을 포함하면 경로에 `/api/v1`을 중복하지 않는다.
+- `$api`의 `baseURL`이 이미 `/api/v1`을 포함하므로 경로에 `/api/v1`을 중복하지 않는다.
+- 에러는 `try / catch`로 받고 `ApiError`로 좁혀서 처리한다.
+
+```typescript
+try {
+  await $api.post<Order>('/orders', payload)
+} catch (e) {
+  const err = e as ApiError
+  errorMessage.value = t(err.i18nKey)
+}
+```
 
 ### 5.8 i18n 규칙
 
@@ -383,18 +412,18 @@ const response = await ($api as AxiosInstance).get<ApiResponse<ProductDetail>>(
 - 모든 컨테이너는 공통 Docker 네트워크(`{prefix}-network` 또는 `{project}-network`, bridge)에 연결한다.
 - 포트 할당 예시:
 
-| 서비스 | 호스트 포트 |
-|--------|------------|
-| Frontend | 3000 |
-| API Gateway | 8080 |
-| Backend Service 1 | 8081 |
-| Backend Service 2 | 8082 |
-| Backend Service N | 808N |
-| Discovery (Eureka) | 8761 |
-| MySQL | 3306 |
-| Redis | 6379 |
-| Kafka | 9092 |
-| Kafka UI (개발, 선택) | 8090 |
+| 서비스                | 호스트 포트 |
+| --------------------- | ----------- |
+| Frontend              | 3000        |
+| API Gateway           | 8080        |
+| Backend Service 1     | 8081        |
+| Backend Service 2     | 8082        |
+| Backend Service N     | 808N        |
+| Discovery (Eureka)    | 8761        |
+| MySQL                 | 3306        |
+| Redis                 | 6379        |
+| Kafka                 | 9092        |
+| Kafka UI (개발, 선택) | 8090        |
 
 ### 6.3 환경변수 오버라이드
 
@@ -530,6 +559,17 @@ test(order): 주문 상태 전이 단위 테스트 추가
 3. API 계약
    - OpenAPI Spec 방식: `docs/sdd-spec-docs/feature/{service}/openapi.yaml`
    - Swagger 방식: 해당 서비스 Controller 어노테이션 및 `/v3/api-docs`
+   - 프론트엔드: `docs/sdd-spec-docs/feature/nuxt-app/api-client-spec.md`
 4. `docs/internationalization.md`, `docs/translation-system.md` — 다국어
 5. 각 서비스의 기존 코드 패턴 — 컨벤션 참고
 6. 이 `AGENTS.md` — 범용 규칙
+
+### 10.5 작업 목록 관리 (`docs/tasks.md`)
+
+`docs/tasks.md`는 서비스별 기능 단위 체크리스트이며, **작업 진행 상태의 진실의 원천**이다.
+
+- 작업을 시작하기 전에 `docs/tasks.md`에서 해당 태스크와 연결된 스펙 문서를 먼저 읽는다.
+- 태스크에 `_(스펙 미작성)_`이 붙어 있으면 **구현보다 스펙 작성이 선행**한다.
+- 작업을 완료하면 해당 체크박스를 `[x]`로 갱신한다. 진행 중이면 🟡, 막혔으면 🔴와 사유를 표기한다.
+- 새 기능·새 스펙 문서를 추가하면 `docs/tasks.md`의 태스크 목록과 하단 "스펙 문서 현황" 표에 함께 반영한다.
+- `docs/development-roadmap.md`는 Phase 단위의 순서·의존 관계만 다룬다. 세부 진행 상태는 `tasks.md`를 따르며, Phase 전체가 끝났을 때 로드맵을 갱신한다.

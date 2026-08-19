@@ -19,7 +19,7 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 
 ```
                      ┌─────────────┐
-                     │  Nuxt 3     │
+                     │  Nuxt 4     │
                      │  Frontend   │
                      │  (port 3000)│
                      └──────┬──────┘
@@ -99,8 +99,12 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 | Vue | 3.5.41 | UI 프레임워크 |
 | Tailwind CSS | 최신 | 스타일링 |
 | Pinia | 4.x | 상태 관리 |
-| Axios | 1.x | HTTP 클라이언트 |
+| `$fetch` (ofetch) | Nuxt 내장 | HTTP 클라이언트 — 자체 API Client로 래핑 |
 | @nuxtjs/i18n | 최신 | 다국어 지원 |
+
+> HTTP 통신은 Nuxt에 내장된 `$fetch`를 래핑한 API Client(`app/utils/api-client.ts`)로 일원화합니다.
+> Access Token 주입, `Accept-Language` 주입, `ApiResponse` 언랩, 401 토큰 갱신 큐를 이 계층이 담당합니다.
+> 상세 계약은 [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md)를 참조하세요.
 
 ### Backend
 | 기술 | 버전 | 용도 |

@@ -139,6 +139,64 @@ Authorization: Bearer <JWT_ACCESS_TOKEN>
 
 - **API Gateway**: 요청을 검증하고, 유효한 토큰일 경우 `X-User-Id`, `X-User-Role` 헤더를 하위 서비스로 전달합니다.
 
+### 7.1 토큰 저장 정책
+
+| 토큰 | 저장 위치 | 수명 | 비고 |
+|---|---|---|---|
+| Access Token | 클라이언트 메모리 (Pinia) | 짧음 | `Authorization: Bearer` 헤더로 전송. localStorage/쿠키 저장 금지 |
+| Refresh Token | httpOnly + Secure 쿠키 | 김 | JS에서 접근 불가. 브라우저가 자동 전송 |
+
+### 7.2 토큰 갱신 (Refresh) 계약
+
+Access Token이 만료되면 클라이언트는 아래 엔드포인트로 재발급을 요청합니다.
+
+```text
+POST /api/v1/auth/refresh-token
+```
+
+- **Request Body 없음.** Refresh Token은 httpOnly 쿠키로 전달됩니다.
+- 이 엔드포인트는 Access Token 없이 호출되므로 `permitAll()`로 공개합니다.
+
+성공 응답 (200):
+
+```json
+{
+  "status": 200,
+  "message": "Success",
+  "data": { "accessToken": "<NEW_JWT_ACCESS_TOKEN>" }
+}
+```
+
+실패 응답 (401):
+
+```json
+{
+  "status": 401,
+  "message": "REFRESH_TOKEN_EXPIRED",
+  "data": null
+}
+```
+
+| 에러 코드 | 의미 |
+|---|---|
+| `REFRESH_TOKEN_NOT_FOUND` | 쿠키에 Refresh Token이 없음 |
+| `REFRESH_TOKEN_INVALID` | 서명 불일치 또는 저장소에 없는 토큰 |
+| `REFRESH_TOKEN_EXPIRED` | 만료됨 |
+| `ACCESS_TOKEN_EXPIRED` | (일반 API에서) Access Token 만료 — 클라이언트가 갱신을 트리거 |
+
+**클라이언트 동작**: 401 수신 시 갱신을 **동시에 한 번만** 수행하고(single-flight), 갱신 중 도착한 요청은 대기시켰다가 일괄 재시도합니다.
+갱신 실패 시 인증 상태를 비우고 로그인 페이지로 이동합니다.
+상세 스펙은 [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md)를 참조하세요.
+
+### 7.3 CORS
+
+프론트엔드가 `credentials: 'include'`로 요청하므로 API Gateway는 다음을 만족해야 합니다.
+
+- `Access-Control-Allow-Credentials: true`
+- `Access-Control-Allow-Origin`에 **와일드카드(`*`) 사용 불가.** 구체 오리진 명시 (개발: `http://localhost:3000`)
+- `Access-Control-Allow-Headers`에 `Authorization`, `Content-Type`, `Accept-Language` 포함
+- Preflight(`OPTIONS`) 요청 허용
+
 ---
 
 ## 8. HTTP Status Codes
