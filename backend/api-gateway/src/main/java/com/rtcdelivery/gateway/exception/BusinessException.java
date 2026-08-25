@@ -1,14 +1,14 @@
-package com.rtcdelivery.memberauth.exception;
+package com.rtcdelivery.gateway.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
- * 비즈니스 규칙 위반. {@link GlobalExceptionHandler}가 {@link ErrorCode}에 따라 응답으로 변환한다.
+ * Gateway 단계에서 발생하는 비즈니스 규칙 위반.
+ * {@link GatewayErrorWebExceptionHandler}가 {@link ErrorCode}에 따라 응답으로 변환한다.
  *
- * <pre>
- * throw new BusinessException(ErrorCode.DUPLICATE_USERNAME);
- * </pre>
+ * <p>하위 서비스의 {@code BusinessException}과 이름을 맞춘다. 참고 문서의 {@code GlobalException}이
+ * 이 클래스에 대응한다.
  */
 @Getter
 public class BusinessException extends RuntimeException {

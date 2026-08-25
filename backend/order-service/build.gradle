@@ -13,6 +13,12 @@ java {
     }
 }
 
+// 소스가 UTF-8로 저장되어 있으므로 컴파일러에도 명시한다.
+// 지정하지 않으면 플랫폼 기본 charset을 따라가, 한국어 Windows에서 주석과 문자열이 깨질 수 있다.
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor

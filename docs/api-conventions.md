@@ -83,6 +83,10 @@ Accept-Language: ja
 }
 ```
 
+`data` 키는 값이 `null`이더라도 **생략하지 않습니다.** 프론트엔드 API Client가 `data` 키의 존재로 `ApiResponse` 여부를 판정하기 때문입니다.
+
+서비스별 구현 방법, 예외 매핑 표, 전체 에러 코드 카탈로그는 [error-handling.md](./error-handling.md)를 참조하세요.
+
 ### 프론트엔드 매핑
 
 ```json
@@ -137,7 +141,16 @@ GET /api/v1/restaurants?page=0&size=10&sort=rating,desc
 Authorization: Bearer <JWT_ACCESS_TOKEN>
 ```
 
-- **API Gateway**: 요청을 검증하고, 유효한 토큰일 경우 `X-User-Id`, `X-User-Role` 헤더를 하위 서비스로 전달합니다.
+- **API Gateway**: 요청을 검증하고, 유효한 토큰일 경우 아래 헤더를 하위 서비스로 전달합니다.
+
+| 헤더 | 값 | 용도 |
+|---|---|---|
+| `X-User-Id` | `members.id` | 인가 판단의 기준 |
+| `X-User-Name` | `members.username` | 로깅 · 감사 |
+| `X-User-Role` | `ROLE_USER` / `ROLE_ADMIN` | 인가 판단의 기준 |
+
+- Gateway는 **클라이언트가 보낸 `X-User-*` 헤더를 항상 제거한 뒤** 자신이 검증한 값으로 덮어씁니다. 인증이 필요 없는 경로에서도 제거는 수행합니다.
+- 하위 서비스는 이 헤더를 신뢰합니다. 따라서 **운영에서 백엔드 서비스 포트를 외부에 노출하지 않습니다.**
 
 ### 7.1 토큰 저장 정책
 
@@ -183,10 +196,18 @@ POST /api/v1/auth/refresh-token
 | `REFRESH_TOKEN_INVALID` | 서명 불일치 또는 저장소에 없는 토큰 |
 | `REFRESH_TOKEN_EXPIRED` | 만료됨 |
 | `ACCESS_TOKEN_EXPIRED` | (일반 API에서) Access Token 만료 — 클라이언트가 갱신을 트리거 |
+| `ACCESS_TOKEN_INVALID` | 토큰 누락, 서명 불일치, 형식 오류 |
 
 **클라이언트 동작**: 401 수신 시 갱신을 **동시에 한 번만** 수행하고(single-flight), 갱신 중 도착한 요청은 대기시켰다가 일괄 재시도합니다.
 갱신 실패 시 인증 상태를 비우고 로그인 페이지로 이동합니다.
-상세 스펙은 [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md)를 참조하세요.
+
+**상세 스펙**
+
+| 문서 | 다루는 것 |
+|---|---|
+| [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) | 토큰 발급, RS256 키 관리, Redis 기반 Refresh Token Rotation |
+| [gateway-auth-spec.md](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md) | Gateway의 토큰 검증, 헤더 주입, 제외 경로 |
+| [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) | 프론트엔드 갱신 큐 동작 |
 
 ### 7.3 CORS
 

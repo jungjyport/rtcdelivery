@@ -51,10 +51,13 @@
   - [ ] 글로벌 헤더 (인증 상태 3-state 렌더링 적용)
   - [ ] 글로벌 푸터
 - [ ] **인증 화면**
-  - [ ] 로그인 페이지
-  - [ ] 회원가입 페이지
-  - [ ] 로그아웃 처리
+  - 스펙: [auth-jwt-spec.md §3](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#3-엔드포인트) — 요청/응답 계약
+  - [ ] 로그인 페이지 — `POST /auth/login` → `authStore.setAuth(accessToken, user)`
+  - [ ] 회원가입 페이지 — `POST /auth/signup`, 백엔드와 동일한 검증 규칙 적용
+  - [ ] 로그아웃 처리 — `POST /auth/logout` → `clearAuth()`
+  - [ ] i18n `error.*` 인증 에러 코드 추가 ([error-handling.md §3.2](./error-handling.md#32-인증--회원-member-auth-service--api-gateway))
   - [ ] OAuth 진입 (Google / Kakao)
+    - _(스펙 미작성)_
 - [ ] **음식점 · 메뉴 화면**
   - [ ] 카테고리 목록
   - [ ] 음식점 목록 (SSR 프리페치)
@@ -73,27 +76,45 @@
 ## 2. member-auth-service
 
 > 계약 방식: **Swagger (Code-first)** — Controller/DTO 어노테이션이 진실의 원천
+> 스펙: [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) — 이 서비스의 모든 인증 태스크가 이 문서를 따릅니다.
 
 - [x] **스캐폴딩** — `ApiResponse`, `BusinessException`, `GlobalExceptionHandler`, `SecurityConfig`
-- [ ] **Member 도메인** — 엔티티(`BaseTimeEntity` 상속), Repository, DTO
+- [x] **에러 처리 정비** — `ErrorCode` enum, `BusinessException` 재작성, `GlobalExceptionHandler` 확장
+  - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
+  - [x] `ApiResponse`의 `@JsonInclude(NON_NULL)` 제거 (에러 응답에서 `data` 키가 사라져 프론트 파싱이 깨짐)
+  - [x] `RestAuthenticationEntryPoint` / `RestAccessDeniedHandler` — 필터 단계 401/403도 `ApiResponse` 포맷으로
+- [ ] **공통 JPA 기반** — `BaseTimeEntity` + `JpaAuditingConfig`
+  - 스펙: [auth-jwt-spec.md §2.2](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#22-basetimeentity)
+- [ ] **Member 도메인** — `Member` 엔티티, `Role` / `AuthProvider` enum, `MemberRepository`
+  - 스펙: [auth-jwt-spec.md §2](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#2-데이터-모델)
+- [ ] **JWT 발급 기반 (RS256)** — RSA 키 생성, `JwtProperties`, `JwtProvider`
+  - 스펙: [auth-jwt-spec.md §4](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#4-jwt-설계)
+  - [ ] 키 쌍 생성 + `.gitignore` 등록 (개인키는 절대 커밋 금지)
+  - [ ] `jwt.secret` / `jwt.expiration` 등 HS256 잔재 설정 제거
+  - [ ] Access Token 클레임 (`sub`, `userId`, `role`, `typ=access`), 수명 30분
 - [ ] **회원가입**
   - [ ] BE — `POST /api/v1/auth/signup`, 중복 검사, `PasswordEncoder`
   - [ ] FE — 회원가입 폼 + 검증
 - [ ] **로그인 (JWT 발급)**
+  - 스펙: [auth-jwt-spec.md §3.2](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#32-로그인--post-apiv1authlogin)
   - [ ] BE — `POST /api/v1/auth/login`, Access Token 발급 + Refresh Token 쿠키 세팅
   - [ ] FE — 로그인 폼 + 인증 스토어 반영
-  - 스펙: [api-conventions.md §7](./api-conventions.md#7-인증-및-보안-authentication--security)
-- [ ] **Refresh Token**
-  - 스펙: [api-conventions.md §7.2](./api-conventions.md#72-토큰-갱신-refresh-계약) · [api-client-spec.md §10](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md#10-백엔드-요구사항-member-auth-service--api-gateway)
-  - [ ] Redis에 Refresh Token 저장 / 검증
-  - [ ] `POST /api/v1/auth/refresh-token` — httpOnly 쿠키 기반, `permitAll()`
-  - [ ] 쿠키 속성 (dev `SameSite=Lax` / prod `SameSite=None; Secure`)
-  - [ ] 실패 에러 코드 정의 (`REFRESH_TOKEN_EXPIRED` 등)
-- [ ] **로그아웃** — `POST /api/v1/auth/logout`, Refresh Token 무효화 + 쿠키 삭제
+- [ ] **Refresh Token Rotation (Redis)**
+  - 스펙: [auth-jwt-spec.md §5](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#5-refresh-token-rotation-rtr) · [api-conventions.md §7.2](./api-conventions.md#72-토큰-갱신-refresh-계약)
+  - [ ] `RedisConfig` + `RefreshTokenService` — 키 `RT:{username}`, TTL 7일, **단일 세션 정책**
+  - [ ] `POST /api/v1/auth/refresh-token` — httpOnly 쿠키 기반, `permitAll()`, 매 갱신마다 RT 회전
+  - [ ] 재사용 탐지 — 저장값 불일치 시 세션 전체 무효화
+  - [ ] 쿠키 속성 (dev `SameSite=Lax` / prod `SameSite=None; Secure`), `Path=/api/v1/auth`
+  - [ ] 실패 시 쿠키 삭제 헤더 동반 + 에러 코드 (`REFRESH_TOKEN_EXPIRED` 등)
+- [ ] **로그아웃** — `POST /api/v1/auth/logout`, Redis `DEL` + 쿠키 삭제, **항상 200 반환**
 - [ ] **내 정보** — `GET /api/v1/auth/me` (세션 복구 시 사용)
+- [ ] **Gateway 헤더 인증** — `HeaderAuthenticationFilter` + `SecurityConfig`를 `authenticated()`로 잠금
+  - 스펙: [auth-jwt-spec.md §6](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#6-security-구성)
+  - 선행: api-gateway의 JWT 검증 필터. 헤더가 주입되기 전에는 `/auth/me`가 401만 반환한다
 - [ ] **OAuth 로그인** — Google / Kakao, `AuthProvider` 분기
   - _(스펙 미작성 — 소셜 로그인 플로우 스펙 선행 필요)_
 - [ ] **단위 테스트 70% 이상**
+  - 스펙: [auth-jwt-spec.md §9](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#9-테스트-계획)
 
 ---
 
@@ -102,6 +123,8 @@
 > 계약 방식: **Swagger (Code-first)**
 
 - [x] **스캐폴딩**
+- [x] **에러 처리 정비** — `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`, `ApiResponse`의 `@JsonInclude` 제거
+  - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
 - [ ] **카테고리** — 엔티티 + CRUD API
 - [ ] **음식점(Restaurant)** — 엔티티 + CRUD API + 페이지네이션/정렬
 - [ ] **메뉴(Food)** — 엔티티 + CRUD API
@@ -121,6 +144,8 @@
 > 계약 방식: **Swagger (Code-first)**
 
 - [x] **스캐폴딩**
+- [x] **에러 처리 정비** — `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`, `ApiResponse`의 `@JsonInclude` 제거
+  - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
 - [ ] **Order / OrderItem 도메인** — 엔티티 설계
 - [ ] **주문 생성** — `POST /api/v1/orders`
 - [ ] **주문 조회** — 내 주문 목록 / 주문 상세
@@ -140,6 +165,8 @@
 > 계약 방식: **Swagger (Code-first)**
 
 - [x] **스캐폴딩**
+- [x] **에러 처리 정비** — `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`, `ApiResponse`의 `@JsonInclude` 제거
+  - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
 - [ ] **Payment 도메인** — 엔티티 + 결제 상태 관리
 - [ ] **결제 승인 / 취소** — Mock PG 연동
 - [ ] **환불**
@@ -152,15 +179,34 @@
 
 ## 6. api-gateway
 
+> 스택: **WebFlux (Reactive)** — `spring-cloud-starter-gateway` + Netty. 이미 Reactive이므로 WebFlux 마이그레이션은 불필요합니다.
+> 스펙: [gateway-auth-spec.md](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md)
+
 - [x] **스캐폴딩**
-- [ ] **서비스 라우팅** — Eureka 서비스명 기반 라우팅
-- [ ] **JWT 인증 필터** — 검증 후 `X-User-Id` / `X-User-Role` 헤더 전달
+- [x] **서비스 라우팅** — Eureka `lb://` 기반 라우팅 (`application.properties`에 선언)
+- [x] **에러 처리** — `ApiResponse`, `ErrorCode`, `BusinessException`, `ErrorResponseWriter`, `GatewayErrorWebExceptionHandler`
+  - 스펙: [error-handling.md §5](./error-handling.md#5-gateway-구현-webflux) · [gateway-auth-spec.md §5](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md#5-gatewayerrorwebexceptionhandler)
+  - [x] `ErrorWebExceptionHandler` + `@Order(-2)` (`@RestControllerAdvice`는 Gateway 프록시 예외를 잡지 못함)
+  - [x] 응답을 `ApiResponse` 포맷으로 통일 (참고 코드의 `{code,message,status,timestamp}` 형식은 프론트 파싱과 불일치)
+  - [x] 커밋 가드 (`response.isCommitted()`) + `ObjectMapper` 직렬화
 - [ ] **CORS 설정**
-  - 스펙: [api-conventions.md §7.3](./api-conventions.md#73-cors) · [api-client-spec.md §10.3](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md#103-cors)
+  - 스펙: [gateway-auth-spec.md §6](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md#6-cors) · [api-conventions.md §7.3](./api-conventions.md#73-cors)
+  - [ ] `SecurityConfig`로 일원화하고 `spring.cloud.gateway.globalcors.*` 제거 (헤더 중복 부착 방지)
   - [ ] `allowCredentials: true` + 구체 오리진 명시 (와일드카드 금지)
-  - [ ] `Authorization` / `Accept-Language` 헤더 허용, Preflight 처리
+  - [ ] `Authorization` / `Content-Type` / `Accept-Language` 헤더 **명시적으로 나열**, Preflight 처리
+- [ ] **JWT 검증 (RS256 공개키)** — `JwtProperties` + `JwtValidator`
+  - 스펙: [gateway-auth-spec.md §3](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md#3-jwtvalidator)
+  - [ ] `jwt.secret`(HS256 대칭키) 제거 — Gateway가 서명 능력을 갖지 않게 한다
+  - [ ] 서명 · 만료 · `iss` · `typ=access` 검증, 실패 사유 구분
+- [ ] **JWT 인증 필터** — `JwtVerificationFilter implements GlobalFilter, Ordered` (order `-10`)
+  - 스펙: [gateway-auth-spec.md §4](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md#4-jwtverificationfilter)
+  - [ ] **클라이언트가 보낸 `X-User-*` 헤더 제거를 최우선 수행** (제외 경로에서도)
+  - [ ] 검증 후 `X-User-Id` / `X-User-Name` / `X-User-Role` 주입
+  - [ ] 제외 경로 — `/auth/{signup,login,refresh-token,logout}`, actuator, swagger, **`OPTIONS` 전체**
+  - [ ] 401 응답을 `ApiResponse` 포맷으로
 - [ ] **Rate Limiting** — Redis 기반
 - [ ] **JWT 블랙리스트** — 로그아웃 토큰 차단
+  - _(스펙 미작성 — 현재는 AT 수명 30분으로 노출 창을 제한하는 것으로 갈음)_
 
 ---
 
@@ -189,7 +235,9 @@
 ## 9. 인프라 · 공통
 
 - [x] **docker-compose-dev.yml** — MySQL, Redis, Kafka, Zookeeper
-- [x] **설계 문서 세트** — architecture / api-conventions / i18n / translation-system / roadmap
+- [x] **설계 문서 세트** — architecture / api-conventions / error-handling / i18n / translation-system / roadmap
+- [ ] **JWT 키 관리** — RSA 키 쌍 생성 절차 문서화, 개인키 `.gitignore` 등록, prod 환경변수 주입
+  - 스펙: [auth-jwt-spec.md §4.1](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#41-알고리즘-및-키-관리)
 - [ ] **서비스별 Dockerfile** — 6개 백엔드 + Nuxt 앱
 - [ ] **docker-compose-prod.yml** — 풀스택 컨테이너화
 - [ ] **모니터링** — Actuator + Prometheus + Grafana
@@ -204,11 +252,39 @@
 | 대상 | 계약 방식 | 스펙 문서 |
 |---|---|---|
 | frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) |
-| member-auth-service | Swagger (Code-first) | 어노테이션 + [api-conventions.md §7](./api-conventions.md#7-인증-및-보안-authentication--security) |
+| member-auth-service | Swagger (Code-first) | 어노테이션 + [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) |
 | food-catalog-service | Swagger (Code-first) | 어노테이션 + [translation-system.md](./translation-system.md) |
 | order-service | Swagger (Code-first) | 어노테이션 |
 | payment-service | Swagger (Code-first) | 어노테이션 |
-| api-gateway | — | [api-conventions.md §7.3](./api-conventions.md#73-cors) |
+| api-gateway | — | [gateway-auth-spec.md](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md) |
 | translation-service | 미정 | [translation-system.md](./translation-system.md) |
 
+**전 서비스 공통**
+
+| 문서 | 다루는 것 |
+|---|---|
+| [api-conventions.md](./api-conventions.md) | URI 명명, 응답 래퍼, 페이지네이션, 인증 헤더 |
+| [error-handling.md](./error-handling.md) | 에러 응답 구현 방법, 예외 매핑, 에러 코드 카탈로그 |
+
 > 새 스펙 문서는 `docs/sdd-spec-docs/feature/{service-name}/`에 두고, 이 표와 해당 태스크에 링크를 추가합니다.
+
+---
+
+## 다음 작업 (인증 기능)
+
+`auth-jwt-spec.md §10` · `gateway-auth-spec.md §10`의 구현 순서를 요약한 것입니다.
+
+| 순서 | 작업 | 대상 | 상태 |
+|---|---|---|---|
+| 1 | 에러 처리 정비 (`ErrorCode` / `BusinessException` / `GlobalExceptionHandler`) | MVC 4개 서비스 | 완료 |
+| 2 | `GatewayErrorWebExceptionHandler` | api-gateway | 완료 |
+| 2-1 | CORS 일원화 (`SecurityConfig`로 이전, `globalcors` 제거) | api-gateway | |
+| 3 | `BaseTimeEntity` + `Member` 도메인 | member-auth-service | |
+| 4 | RSA 키 생성 + `JwtProvider` | member-auth-service | |
+| 5 | 회원가입 → 로그인 (AT 발급 + RT 쿠키) | member-auth-service | |
+| 6 | `RefreshTokenService` (RTR) + `/refresh-token` + `/logout` | member-auth-service | |
+| 7 | `JwtValidator` + `JwtVerificationFilter` | api-gateway | |
+| 8 | `HeaderAuthenticationFilter` + `/auth/me` + Security 잠금 | member-auth-service | |
+| 9 | 로그인 · 회원가입 화면 | nuxt-app | |
+
+7과 8은 한 묶음입니다. Gateway가 헤더를 주입하기 전에는 `/auth/me`가 401만 반환하기 때문입니다.

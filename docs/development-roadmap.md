@@ -45,17 +45,25 @@
 ---
 
 ### Phase 4: API Gateway & Service Discovery ⚪ (Planned)
+> 스펙: [gateway-auth-spec.md](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md)
+
 - [ ] Eureka Server 서비스 탐색 연동 검증
-- [ ] Gateway 글로벌 JWT 인증 및 라우팅 필터 세부 구현
+- [ ] Gateway 글로벌 JWT 인증 및 라우팅 필터 세부 구현 (RS256 공개키 검증 + `X-User-*` 헤더 주입)
 - [ ] CORS 설정 (`allowCredentials: true`, 구체 오리진 명시) 및 Rate Limiting (Redis) 활성화
 
 ---
 
 ### Phase 5: Member Auth Service (회원/인증) ⚪ (Planned)
+> 스펙: [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md)
+
 - [ ] Member 엔티티, DTO, Repository, Service 구현
-- [ ] 회원가입, 로그인, JWT 토큰 발급/갱신 (Refresh Token in Redis)
+- [ ] 회원가입, 로그인, JWT 토큰 발급 (RS256 비대칭 키)
+- [ ] Refresh Token Rotation (Redis, 단일 세션 정책 + 재사용 탐지)
 - [ ] `POST /api/v1/auth/refresh-token` — Refresh Token을 httpOnly 쿠키로 발급/검증 (api-conventions.md 7.2)
 - [ ] Spring Security & PasswordEncoder 연동
+
+> **Phase 4와 Phase 5는 일부 겹칩니다.** Gateway의 토큰 검증(Phase 4)이 없으면 `/api/v1/auth/me`가 동작하지 않으므로,
+> Phase 5의 로그인까지 끝낸 뒤 Phase 4의 JWT 필터를 붙이고 다시 Phase 5의 `/auth/me`를 마무리합니다.
 
 ---
 
