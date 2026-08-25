@@ -23,15 +23,17 @@
 
 ---
 
-### Phase 2: Frontend API Client 전환 (axios → `$fetch`) 🟡 (Spec 작성 완료)
+### Phase 2: Frontend API Client 전환 (axios → `$fetch`) 🟢 (Completed)
 - [x] API Client 스펙 작성 (`docs/sdd-spec-docs/feature/nuxt-app/api-client-spec.md`)
-- [ ] `types/api.ts` — `ApiError`, `ApiClient`, `ApiRequestOptions` 정의
-- [ ] `stores/auth.ts` — Access Token 메모리 저장 + 세션 복구 플래그
-- [ ] `utils/api-client.ts` — `$fetch` 래핑, `ApiResponse` 언랩, 401 토큰 갱신 큐
-- [ ] `plugins/api.ts` — `$api` 등록 (axios 인스턴스 제거)
-- [ ] `composables/useApiFetch.ts` — SSR 프리페치 래퍼
-- [ ] i18n `error.*` 클라이언트 에러 코드 추가 (ko/ja)
-- [ ] `axios` 의존성 및 예제 파일 제거
+- [x] `types/api.ts` — `ApiError`, `ApiClient`, `ApiRequestOptions` 정의
+- [x] `stores/auth.ts` — Access Token 메모리 저장 + 세션 복구 플래그
+- [x] `utils/api-client.ts` — `$fetch` 래핑, `ApiResponse` 언랩, 401 토큰 갱신 큐
+- [x] `plugins/api.ts` — `$api` 등록 (axios 인스턴스 제거)
+- [x] `plugins/auth-restore.client.ts` — 전역 세션 복구 (await 없음)
+- [x] `middleware/auth.ts` — 인증 라우트 가드
+- [x] `composables/useApiFetch.ts` — SSR 프리페치 래퍼
+- [x] i18n `error.*` 클라이언트 에러 코드 추가 (ko/ja)
+- [x] `axios` 의존성 및 예제 파일 제거
 
 ---
 

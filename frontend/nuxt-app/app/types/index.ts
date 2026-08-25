@@ -2,12 +2,7 @@
 // API 관련 타입 정의
 // ============================================================
 
-/** 공통 API 응답 */
-export interface ApiResponse<T> {
-  status: number
-  message: string
-  data: T
-}
+export type { ApiResponse } from './api'
 
 /** 페이지네이션 응답 */
 export interface PageResponse<T> {

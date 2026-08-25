@@ -112,6 +112,10 @@
     "INTERNAL_SERVER_ERROR": "サーバーエラーが発生しました。",
     "VALIDATION_ERROR": "入力内容をご確認ください。",
     "DUPLICATE_EMAIL": "すでに使用されているメールアドレスです。",
-    "INVALID_CREDENTIALS": "メールアドレスまたはパスワードが正しくありません。"
+    "INVALID_CREDENTIALS": "メールアドレスまたはパスワードが正しくありません。",
+    "NETWORK_ERROR": "ネットワーク接続を確認してください。",
+    "REQUEST_TIMEOUT": "リクエストがタイムアウトしました。",
+    "INVALID_RESPONSE": "サーバーの応答を処理できません。",
+    "UNKNOWN_ERROR": "不明なエラーが発生しました。"
   }
 }

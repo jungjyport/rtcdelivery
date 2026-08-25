@@ -36,17 +36,17 @@
 - [x] **@nuxtjs/i18n 도입** (ko / ja)
   - 스펙: [internationalization.md](./internationalization.md)
 - [x] **메인 페이지 i18n 적용 및 언어 전환 UI**
-- [ ] **API Client 전환 (axios → `$fetch`)** 🟡
+- [x] **API Client 전환 (axios → `$fetch`)**
   - 스펙: [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md)
-  - [ ] `types/api.ts` — `ApiError` / `ApiClient` / `ApiRequestOptions`
-  - [ ] `stores/auth.ts` — 메모리 토큰 + `isRestoring` + `restoreSession()`
-  - [ ] `utils/api-client.ts` — `$fetch` 래핑, `ApiResponse` 언랩, 401 갱신 큐
-  - [ ] `plugins/api.ts` — `$api` 등록
-  - [ ] `plugins/auth-restore.client.ts` — 전역 세션 복구 (await 없음)
-  - [ ] `middleware/auth.ts` — 인증 라우트 가드
-  - [ ] `composables/useApiFetch.ts` — SSR 프리페치 래퍼
-  - [ ] i18n `error.*` 클라이언트 에러 코드 추가
-  - [ ] `axios` 의존성 및 예제 파일 제거
+  - [x] `types/api.ts` — `ApiError` / `ApiClient` / `ApiRequestOptions`
+  - [x] `stores/auth.ts` — 메모리 토큰 + `isRestoring` + `restoreSession()`
+  - [x] `utils/api-client.ts` — `$fetch` 래핑, `ApiResponse` 언랩, 401 갱신 큐
+  - [x] `plugins/api.ts` — `$api` 등록
+  - [x] `plugins/auth-restore.client.ts` — 전역 세션 복구 (await 없음)
+  - [x] `middleware/auth.ts` — 인증 라우트 가드
+  - [x] `composables/useApiFetch.ts` — SSR 프리페치 래퍼
+  - [x] i18n `error.*` 클라이언트 에러 코드 추가
+  - [x] `axios` 의존성 및 예제 파일 제거
 - [ ] **공통 레이아웃**
   - [ ] 글로벌 헤더 (인증 상태 3-state 렌더링 적용)
   - [ ] 글로벌 푸터

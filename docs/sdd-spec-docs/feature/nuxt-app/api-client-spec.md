@@ -1,6 +1,6 @@
 # RTC Delivery — Frontend API Client Spec (`$fetch` 기반)
 
-> **상태**: Draft (구현 전)
+> **상태**: Implemented
 > **대상**: `frontend/nuxt-app`
 > **관련 문서**: [architecture.md](../../../architecture.md), [api-conventions.md](../../../api-conventions.md), [AGENTS.md](../../../AGENTS.md)
 
