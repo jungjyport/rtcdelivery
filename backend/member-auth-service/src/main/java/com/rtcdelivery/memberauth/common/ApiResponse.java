@@ -30,6 +30,14 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static <T> ApiResponse<T> ok(T data) {
+        return success(data);
+    }
+
+    public static <T> ApiResponse<T> ok() {
+        return success(null);
+    }
+
     public static <T> ApiResponse<T> success(String message, T data) {
         return ApiResponse.<T>builder()
                 .status(200)

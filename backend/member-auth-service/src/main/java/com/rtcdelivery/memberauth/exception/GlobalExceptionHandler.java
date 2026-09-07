@@ -1,9 +1,12 @@
 package com.rtcdelivery.memberauth.exception;
 
 import com.rtcdelivery.memberauth.common.ApiResponse;
+import com.rtcdelivery.memberauth.security.CookieUtils;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -35,7 +38,10 @@ import java.util.Map;
  */
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final CookieUtils cookieUtils;
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException e) {
@@ -46,7 +52,15 @@ public class GlobalExceptionHandler {
         else {
             log.warn("비즈니스 예외: {} ({})", errorCode.code(), e.getDetail());
         }
-        return toResponse(errorCode);
+
+        ResponseEntity.BodyBuilder builder = ResponseEntity.status(errorCode.getStatus());
+        if (errorCode == ErrorCode.REFRESH_TOKEN_NOT_FOUND
+                || errorCode == ErrorCode.REFRESH_TOKEN_INVALID
+                || errorCode == ErrorCode.REFRESH_TOKEN_EXPIRED) {
+            builder.header(HttpHeaders.SET_COOKIE, cookieUtils.createDeleteRefreshTokenCookie().toString());
+        }
+
+        return builder.body(ApiResponse.error(errorCode.getStatus().value(), errorCode.code()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

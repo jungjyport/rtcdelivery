@@ -13,6 +13,8 @@
 **/application-prod.properties
 **/application-local.properties
 **/application-secret.properties
+**/keys/jwt-private.pem
+*.pem
 
 # ========================
 # Java / Spring Boot
