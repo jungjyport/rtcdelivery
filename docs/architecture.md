@@ -212,16 +212,24 @@ Translation DB (Translation Service 전용)
 
 ### 현재 (개발 환경)
 
-`docker-compose-dev.yml`로 인프라 컨테이너만 관리:
-- MySQL, Redis, Kafka, Zookeeper
+`docker-compose-dev.yml`로 인프라와 애플리케이션을 함께 띄울 수 있습니다.
 
-각 Spring Boot 서비스는 IDE에서 직접 실행합니다.
+- Redis, Kafka, Zookeeper
+- discovery / api-gateway / 도메인 서비스 4개 / nuxt-app
+- **MySQL은 Compose에 포함하지 않습니다.** 호스트 PC의 MySQL에 원격 IP로 접속합니다. 컨테이너도 같은 JDBC URL을 쓰면 되므로 `host.docker.internal`은 쓰지 않습니다.
+- 컨테이너 → 호스트 DB 접속을 위해 MySQL은 `0.0.0.0`에 바인딩하고, `infra/mysql/init/01-init-databases.sql`로 DB·권한을 준비합니다.
+- JWT PEM은 각 서비스 `src/main/resources/keys/`에 두고 볼륨으로 마운트합니다.
+- 백엔드 설정은 `application.properties`(기본값)와 `application-dev.properties`(Compose 네트워크 호스트명)로 나눕니다. Compose는 `SPRING_PROFILES_ACTIVE=dev`만 지정합니다.
+
+IDE에서 서비스를 직접 실행할 때는 인프라만 올리면 됩니다.
+
+```bash
+docker compose -f docker-compose-dev.yml up redis kafka zookeeper
+```
 
 ### 향후 (Planned)
 
-`docker-compose-prod.yml`에 모든 서비스를 포함:
-- 각 Spring Boot 서비스의 Dockerfile 작성
-- Nuxt 앱의 Dockerfile 작성
+`docker-compose-prod.yml`에 운영용 이미지·설정을 분리합니다.
 - 환경별 `.env` 파일로 설정 분리
 - 향후 Kubernetes 전환 고려
 

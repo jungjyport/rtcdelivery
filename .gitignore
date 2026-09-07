@@ -9,6 +9,7 @@
 .env.*
 .env.local
 .env.*.local
+!.env.example
 **/application-dev.properties
 **/application-prod.properties
 **/application-local.properties

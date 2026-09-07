@@ -51,7 +51,8 @@
   - [ ] 글로벌 헤더 (인증 상태 3-state 렌더링 적용)
   - [ ] 글로벌 푸터
 - [ ] **인증 화면**
-  - 스펙: [auth-jwt-spec.md §3](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#3-엔드포인트) — 요청/응답 계약
+  - 스펙: [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) — 화면 · 검증 · i18n
+  - API 계약: [auth-jwt-spec.md §3](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#3-엔드포인트)
   - [ ] 로그인 페이지 — `POST /auth/login` → `authStore.setAuth(accessToken, user)`
   - [ ] 회원가입 페이지 — `POST /auth/signup`, 백엔드와 동일한 검증 규칙 적용
   - [ ] 로그아웃 처리 — `POST /auth/logout` → `clearAuth()`
@@ -93,10 +94,11 @@
   - [x] `jwt.secret` / `jwt.expiration` 등 HS256 잔재 설정 제거
   - [x] Access Token 클레임 (`sub`, `userId`, `role`, `typ=access`), 수명 30분
 - [ ] **회원가입**
+  - 스펙: [auth-jwt-spec.md §3.1](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#31-회원가입--post-apiv1authsignup) · FE [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md)
   - [x] BE — `POST /api/v1/auth/signup`, 중복 검사, `PasswordEncoder`
   - [ ] FE — 회원가입 폼 + 검증
 - [ ] **로그인 (JWT 발급)**
-  - 스펙: [auth-jwt-spec.md §3.2](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#32-로그인--post-apiv1authlogin)
+  - 스펙: [auth-jwt-spec.md §3.2](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#32-로그인--post-apiv1authlogin) · FE [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md)
   - [x] BE — `POST /api/v1/auth/login`, Access Token 발급 + Refresh Token 쿠키 세팅
   - [ ] FE — 로그인 폼 + 인증 스토어 반영
 - [x] **Refresh Token Rotation (Redis)**
@@ -234,11 +236,11 @@
 
 ## 9. 인프라 · 공통
 
-- [x] **docker-compose-dev.yml** — MySQL, Redis, Kafka, Zookeeper
+- [x] **docker-compose-dev.yml** — Redis, Kafka, Zookeeper + 프론트/백엔드 서비스. MySQL은 호스트 PC를 remote DB로 사용
 - [x] **설계 문서 세트** — architecture / api-conventions / error-handling / i18n / translation-system / roadmap
 - [x] **JWT 키 관리** — RSA 키 쌍 생성 절차 문서화, 개인키 `.gitignore` 등록, prod 환경변수 주입
   - 스펙: [auth-jwt-spec.md §4.1](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#41-알고리즘-및-키-관리)
-- [ ] **서비스별 Dockerfile** — 6개 백엔드 + Nuxt 앱
+- [x] **서비스별 Dockerfile** — 6개 백엔드 (`docker/backend/Dockerfile`) + Nuxt (`docker/frontend/Dockerfile.dev`)
 - [ ] **docker-compose-prod.yml** — 풀스택 컨테이너화
 - [ ] **모니터링** — Actuator + Prometheus + Grafana
 - [ ] **분산 트레이싱** — Micrometer Tracing + Zipkin
@@ -251,7 +253,7 @@
 
 | 대상 | 계약 방식 | 스펙 문서 |
 |---|---|---|
-| frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) |
+| frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) · [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) |
 | member-auth-service | Swagger (Code-first) | 어노테이션 + [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) |
 | food-catalog-service | Swagger (Code-first) | 어노테이션 + [translation-system.md](./translation-system.md) |
 | order-service | Swagger (Code-first) | 어노테이션 |

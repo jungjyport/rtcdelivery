@@ -237,8 +237,8 @@ Controller / DTO의 springdoc(Swagger) 어노테이션이 진실의 원천이다
 ### 3.8 설정 파일
 
 - `application.properties`에서 `spring.profiles.active=dev`로 프로파일 분리.
-- 환경별 상세 설정: `application-dev.properties`, `application-prod.properties`.
-- 민감 정보(DB 비밀번호, JWT 시크릿, API 키 등)는 환경변수 또는 외부 설정으로 주입한다. 프로파일 설정 파일은 커밋하지 않는다.
+- Compose 네트워크용 Redis/Eureka/Kafka 호스트명은 `application-dev.properties`에 둔다. DB URL은 호스트 PC MySQL의 실제 주소(원격 IP)를 그대로 쓴다. 이 파일은 계정 정보가 들어가므로 gitignore 한다.
+- `application-prod.properties` / `application-local.properties` / `application-secret.properties`는 gitignore. 운영 비밀값은 환경변수로 주입한다.
 
 ---
 
@@ -402,9 +402,9 @@ try {
 
 ### 6.1 Docker Compose 구조
 
-- `docker-compose-dev.yml`: 로컬 개발 **인프라**(MySQL, Redis, Kafka, Zookeeper 등)를 정의한다.
-- 개발 단계에서 각 Spring Boot 서비스와 Nuxt 앱은 IDE/로컬에서 직접 실행할 수 있다.
-- 서비스까지 컨테이너화할 경우 각 모듈에 `Dockerfile` / `Dockerfile.dev`를 두고 compose에 추가한다.
+- `docker-compose-dev.yml`: 로컬 개발 환경을 정의한다. Redis, Kafka, Zookeeper와 프론트/백엔드 서비스를 포함한다. **MySQL 컨테이너는 두지 않고** 호스트 PC MySQL에 원격 접속한다.
+- 개발 단계에서 각 Spring Boot 서비스와 Nuxt 앱은 IDE에서 직접 실행할 수도 있다. 그때는 인프라 서비스만 compose로 올린다.
+- 백엔드 이미지는 `docker/backend/Dockerfile`, Nuxt 개발 이미지는 `docker/frontend/Dockerfile.dev`를 사용한다.
 - 컨테이너 이름: `{project-prefix}-{service-name}` (예: `rtc-mysql`, `{prefix}-order-service`).
 
 ### 6.2 네트워크 & 포트 컨벤션
@@ -425,19 +425,10 @@ try {
 | Kafka                 | 9092        |
 | Kafka UI (개발, 선택) | 8090        |
 
-### 6.3 환경변수 오버라이드
+### 6.3 설정 파일과 Docker 프로파일
 
-- Docker 내부 통신용 URL은 `docker-compose-dev.yml`의 `environment`에서 서비스명으로 오버라이드한다.
-
-```yaml
-environment:
-  SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-  SPRING_DATA_REDIS_HOST: redis
-  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://{prefix}-discovery-service:8761/eureka/
-```
-
-- 로컬 직접 실행 시에는 `application-dev.properties`의 `localhost` 설정을 사용한다.
-- DB 초기화 스크립트는 `infra/mysql/init/`에 둔다.
+- 공통 기본값(`localhost`)은 `application.properties`에 둔다. IDE에서 직접 실행할 때 이 값을 쓴다.
+- Compose로 띄울 때는 `SPRING_PROFILES_ACTIVE=dev` 만 지정한다. Docker 네트워크용 Redis/Eureka/Kafka 호스트명은 `application-dev.properties`가 덮어쓴다. DB는 호스트 PC의 실제 JDBC URL을 그대로 사용하며 `host.docker.internal`은 필요 없다.
 
 ---
 
@@ -509,7 +500,7 @@ test(order): 주문 상태 전이 단위 테스트 추가
 ### 9.2 .gitignore
 
 - 빌드 산출물, IDE 설정, 로컬 환경파일, `node_modules`, `.gradle`, `.nuxt` 등은 반드시 무시한다.
-- 민감 정보 포함 파일(`.env`, `application-prod.properties`, `application-dev.properties` 등)은 절대 커밋하지 않는다.
+- 민감 정보 포함 파일(`.env`, `application-dev.properties`, `application-prod.properties`, `application-secret.properties` 등)은 절대 커밋하지 않는다.
 
 ---
 
