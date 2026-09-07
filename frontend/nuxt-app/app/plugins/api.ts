@@ -6,18 +6,19 @@ export default defineNuxtPlugin({
   setup(nuxtApp) {
     const config = useRuntimeConfig()
     const authStore = useAuthStore()
-    const { locale } = useI18n()
+    const router = useRouter()
 
     const api = createApiClient({
       baseURL: config.public.apiBaseUrl,
       getAccessToken: () => authStore.accessToken,
       setAccessToken: token => authStore.setToken(token),
-      getLocale: () => locale.value,
+      // 플러그인 setup 안에서는 useI18n()을 쓸 수 없으므로 nuxtApp.$i18n을 사용
+      getLocale: () => nuxtApp.$i18n.locale.value,
       isServer: import.meta.server,
       onLogout: async () => {
         authStore.clearAuth()
         await nuxtApp.runWithContext(() => {
-          if (useRoute().path === '/auth/login') return
+          if (router.currentRoute.value.path === '/auth/login') return
           return navigateTo('/auth/login')
         })
       },
