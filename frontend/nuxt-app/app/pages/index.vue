@@ -271,6 +271,10 @@
 </template>
 
 <script setup lang="ts">
+
+const { $api } = useNuxtApp()
+
+
 const { t, locale } = useI18n()
 
 // SEO Meta (i18n 반응형)
@@ -356,6 +360,9 @@ const features = [
     bgClass: 'bg-emerald-50 text-emerald-500',
   },
 ]
+
+
+
 </script>
 
 <style scoped>
