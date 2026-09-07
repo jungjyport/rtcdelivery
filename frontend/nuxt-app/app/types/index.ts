@@ -2,6 +2,8 @@
 // API 관련 타입 정의
 // ============================================================
 
+import type { AuthUser } from '~/stores/authStore'
+
 export type { ApiResponse } from './api'
 
 /** 페이지네이션 응답 */
@@ -17,34 +19,25 @@ export interface PageResponse<T> {
 // 회원 관련 타입
 // ============================================================
 
-export interface User {
-  id: number
-  email: string
-  name: string
-  phone: string
-  role: UserRole
-  createdAt: string
-}
-
-export type UserRole = 'USER' | 'OWNER' | 'RIDER' | 'ADMIN'
+export type { AuthUser, AuthProvider } from '~/stores/authStore'
 
 export interface LoginRequest {
-  email: string
+  username: string
   password: string
 }
 
-export interface LoginResponse {
+export interface LoginResult {
   accessToken: string
-  refreshToken: string
-  user: User
+  tokenType: 'Bearer'
+  expiresIn: number
+  user: AuthUser
 }
 
 export interface SignupRequest {
-  email: string
+  username: string
   password: string
-  name: string
-  phone: string
-  role: UserRole
+  nickname: string
+  email?: string
 }
 
 // ============================================================

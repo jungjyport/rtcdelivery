@@ -53,10 +53,10 @@
 - [ ] **인증 화면**
   - 스펙: [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) — 화면 · 검증 · i18n
   - API 계약: [auth-jwt-spec.md §3](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#3-엔드포인트)
-  - [ ] 로그인 페이지 — `POST /auth/login` → `authStore.setAuth(accessToken, user)`
-  - [ ] 회원가입 페이지 — `POST /auth/signup`, 백엔드와 동일한 검증 규칙 적용
-  - [ ] 로그아웃 처리 — `POST /auth/logout` → `clearAuth()`
-  - [ ] i18n `error.*` 인증 에러 코드 추가 ([error-handling.md §3.2](./error-handling.md#32-인증--회원-member-auth-service--api-gateway))
+  - [x] 로그인 페이지 — `POST /auth/login` → `authStore.setAuth(accessToken, user)`
+  - [x] 회원가입 페이지 — `POST /auth/signup`, 백엔드와 동일한 검증 규칙 적용
+  - [x] 로그아웃 처리 — `POST /auth/logout` → `clearAuth()`
+  - [x] i18n `error.*` 인증 에러 코드 추가 ([error-handling.md §3.2](./error-handling.md#32-인증--회원-member-auth-service--api-gateway))
   - [ ] OAuth 진입 (Google / Kakao)
     - _(스펙 미작성)_
 - [ ] **음식점 · 메뉴 화면**
@@ -93,14 +93,14 @@
   - [x] 키 쌍 생성 + `.gitignore` 등록 (개인키는 절대 커밋 금지)
   - [x] `jwt.secret` / `jwt.expiration` 등 HS256 잔재 설정 제거
   - [x] Access Token 클레임 (`sub`, `userId`, `role`, `typ=access`), 수명 30분
-- [ ] **회원가입**
+- [x] **회원가입**
   - 스펙: [auth-jwt-spec.md §3.1](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#31-회원가입--post-apiv1authsignup) · FE [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md)
   - [x] BE — `POST /api/v1/auth/signup`, 중복 검사, `PasswordEncoder`
-  - [ ] FE — 회원가입 폼 + 검증
-- [ ] **로그인 (JWT 발급)**
+  - [x] FE — 회원가입 폼 + 검증
+- [x] **로그인 (JWT 발급)**
   - 스펙: [auth-jwt-spec.md §3.2](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#32-로그인--post-apiv1authlogin) · FE [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md)
   - [x] BE — `POST /api/v1/auth/login`, Access Token 발급 + Refresh Token 쿠키 세팅
-  - [ ] FE — 로그인 폼 + 인증 스토어 반영
+  - [x] FE — 로그인 폼 + 인증 스토어 반영
 - [x] **Refresh Token Rotation (Redis)**
   - 스펙: [auth-jwt-spec.md §5](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#5-refresh-token-rotation-rtr) · [api-conventions.md §7.2](./api-conventions.md#72-토큰-갱신-refresh-계약)
   - [x] `RedisConfig` + `RefreshTokenService` — 키 `RT:{username}`, TTL 7일, **단일 세션 정책**
@@ -287,6 +287,6 @@
 | 6 | `RefreshTokenService` (RTR) + `/refresh-token` + `/logout` | member-auth-service | 완료 |
 | 7 | `JwtValidator` + `JwtVerificationFilter` | api-gateway | 완료 |
 | 8 | `HeaderAuthenticationFilter` + `/auth/me` + Security 잠금 | member-auth-service | 완료 |
-| 9 | 로그인 · 회원가입 화면 | nuxt-app | 🟡 대기 |
+| 9 | 로그인 · 회원가입 화면 | nuxt-app | 완료 |
 
 7과 8은 한 묶음입니다. Gateway가 헤더를 주입하기 전에는 `/auth/me`가 401만 반환하기 때문입니다.

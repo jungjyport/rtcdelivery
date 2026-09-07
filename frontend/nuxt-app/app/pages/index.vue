@@ -60,12 +60,18 @@
               </Transition>
             </div>
 
-            <button class="hidden sm:inline-flex text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200">
+            <NuxtLink
+              to="/auth/login"
+              class="hidden sm:inline-flex text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            >
               {{ $t('common.login') }}
-            </button>
-            <button class="btn-primary text-sm !px-4 !py-2 !rounded-lg">
+            </NuxtLink>
+            <NuxtLink
+              to="/auth/signup"
+              class="btn-primary text-sm !px-4 !py-2 !rounded-lg"
+            >
               {{ $t('common.signup') }}
-            </button>
+            </NuxtLink>
           </div>
         </div>
       </div>

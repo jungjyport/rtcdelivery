@@ -112,10 +112,42 @@
     "INTERNAL_SERVER_ERROR": "サーバーエラーが発生しました。",
     "VALIDATION_ERROR": "入力内容をご確認ください。",
     "DUPLICATE_EMAIL": "すでに使用されているメールアドレスです。",
-    "INVALID_CREDENTIALS": "メールアドレスまたはパスワードが正しくありません。",
+    "DUPLICATE_USERNAME": "すでに使用されているユーザーIDです。",
+    "DUPLICATE_NICKNAME": "すでに使用されているニックネームです。",
+    "INVALID_CREDENTIALS": "ユーザーIDまたはパスワードが正しくありません。",
+    "MEMBER_INACTIVE": "無効化されたアカウントです。",
     "NETWORK_ERROR": "ネットワーク接続を確認してください。",
     "REQUEST_TIMEOUT": "リクエストがタイムアウトしました。",
     "INVALID_RESPONSE": "サーバーの応答を処理できません。",
     "UNKNOWN_ERROR": "不明なエラーが発生しました。"
+  },
+  "auth": {
+    "loginTitle": "ログイン",
+    "signupTitle": "会員登録",
+    "usernameLabel": "ユーザーID",
+    "passwordLabel": "パスワード",
+    "passwordConfirmLabel": "パスワード（確認）",
+    "nicknameLabel": "ニックネーム",
+    "emailLabel": "メールアドレス（任意）",
+    "submitLogin": "ログイン",
+    "submitSignup": "登録する",
+    "goSignup": "アカウントをお持ちでない方は会員登録",
+    "goLogin": "すでにアカウントをお持ちの方はログイン",
+    "signupSuccess": "登録が完了しました。ログインしてください。",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを隠す",
+    "validation": {
+      "usernameRequired": "ユーザーIDを入力してください。",
+      "usernameLength": "ユーザーIDは4〜20文字です。",
+      "usernamePattern": "ユーザーIDは英小文字・数字・アンダースコアのみ使用できます。",
+      "passwordRequired": "パスワードを入力してください。",
+      "passwordLength": "パスワードは4〜64文字です。",
+      "passwordConfirmRequired": "確認用パスワードを入力してください。",
+      "passwordMismatch": "パスワードが一致しません。",
+      "nicknameRequired": "ニックネームを入力してください。",
+      "nicknameLength": "ニックネームは2〜20文字です。",
+      "emailInvalid": "メールアドレスの形式が正しくありません。",
+      "emailLength": "メールアドレスは100文字以内です。"
+    }
   }
 }

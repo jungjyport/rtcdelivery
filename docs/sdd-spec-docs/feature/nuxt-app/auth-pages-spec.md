@@ -1,6 +1,6 @@
 # nuxt-app — 회원가입 · 로그인 화면 스펙
 
-> **상태**: Spec (미구현)
+> **상태**: 구현 완료
 > **대상**: `frontend/nuxt-app`
 > **계약 방식**: 문서 기반. API 요청/응답은 [auth-jwt-spec.md §3](../member-auth-service/auth-jwt-spec.md#3-엔드포인트)을 따른다.
 > 필드 검증의 진실의 원천은 member-auth-service의 `SignupRequest` / `LoginRequest` Bean Validation이다 (Swagger Code-first).
