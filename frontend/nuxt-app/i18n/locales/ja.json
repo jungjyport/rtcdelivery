@@ -11,6 +11,10 @@
     "liveTracking": "リアルタイム配達追跡",
     "appDownload": "アプリダウンロード"
   },
+  "header": {
+    "greeting": "{name}さん",
+    "authSlot": "アカウント"
+  },
   "nav": {
     "home": "ホーム",
     "findRestaurants": "グルメ検索",

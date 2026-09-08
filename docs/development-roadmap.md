@@ -38,7 +38,7 @@
 ---
 
 ### Phase 3: Frontend 기본 Layout & UI 컴포넌트 확장 ⚪ (Planned)
-- [ ] 글로벌 헤더/푸터 공통 컴포넌트화
+- [x] 글로벌 헤더/푸터 공통 컴포넌트화
 - [ ] 반응형 카테고리/음식점 목록 UI
 - [ ] 장바구니 Drawer UI 및 Pinia 상태 연동
 

@@ -47,9 +47,10 @@
   - [x] `composables/useApiFetch.ts` — SSR 프리페치 래퍼
   - [x] i18n `error.*` 클라이언트 에러 코드 추가
   - [x] `axios` 의존성 및 예제 파일 제거
-- [ ] **공통 레이아웃**
-  - [ ] 글로벌 헤더 (인증 상태 3-state 렌더링 적용)
-  - [ ] 글로벌 푸터
+- [x] **공통 레이아웃**
+  - 스펙: [layout-spec.md](./sdd-spec-docs/feature/nuxt-app/layout-spec.md)
+  - [x] 글로벌 헤더 (인증 상태 3-state 렌더링 적용)
+  - [x] 글로벌 푸터
 - [ ] **인증 화면**
   - 스펙: [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) — 화면 · 검증 · i18n
   - API 계약: [auth-jwt-spec.md §3](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#3-엔드포인트)
@@ -253,7 +254,7 @@
 
 | 대상 | 계약 방식 | 스펙 문서 |
 |---|---|---|
-| frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) · [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) |
+| frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) · [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) · [layout-spec.md](./sdd-spec-docs/feature/nuxt-app/layout-spec.md) |
 | member-auth-service | Swagger (Code-first) | 어노테이션 + [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) |
 | food-catalog-service | Swagger (Code-first) | 어노테이션 + [translation-system.md](./translation-system.md) |
 | order-service | Swagger (Code-first) | 어노테이션 |

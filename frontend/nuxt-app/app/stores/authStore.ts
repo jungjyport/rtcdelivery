@@ -16,7 +16,8 @@ export const useAuthStore = defineStore('auth', () => {
   /** 메모리 전용. localStorage / sessionStorage / 쿠키에 저장하지 않는다. */
   const accessToken = ref<string | null>(null)
   const user = ref<AuthUser | null>(null)
-  const isRestoring = ref(false)
+  /** 첫 restoreSession()이 끝나기 전까지 true. SSR에서 비로그인 버튼이 찍히지 않게 한다. */
+  const isRestoring = ref(true)
 
   let restorePromise: Promise<void> | null = null
 
@@ -25,6 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
   const setAuth = (token: string, authUser: AuthUser) => {
     accessToken.value = token
     user.value = authUser
+    isRestoring.value = false
   }
 
   const setToken = (token: string) => {
@@ -43,7 +45,10 @@ export const useAuthStore = defineStore('auth', () => {
    */
   const restoreSession = (): Promise<void> => {
     if (import.meta.server) return Promise.resolve()
-    if (accessToken.value) return Promise.resolve()
+    if (accessToken.value) {
+      isRestoring.value = false
+      return Promise.resolve()
+    }
     if (restorePromise) return restorePromise
 
     restorePromise = doRestore().finally(() => {

@@ -11,6 +11,10 @@
     "liveTracking": "실시간 배달 추적",
     "appDownload": "앱 다운로드"
   },
+  "header": {
+    "greeting": "{name}님",
+    "authSlot": "계정"
+  },
   "nav": {
     "home": "홈",
     "findRestaurants": "맛집 찾기",

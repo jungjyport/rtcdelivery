@@ -35,7 +35,7 @@
 |---|---|
 | OAuth (Google / Kakao) | `tasks.md`에 별도 항목. 스펙 미작성 |
 | 비밀번호 재설정 / 이메일 인증 | 백엔드 미구현 |
-| 공통 헤더의 3-state 인증 UI | 레이아웃 태스크. 이번 화면에서 로그인 버튼만 `/auth/login`으로 연결하면 충분 |
+| 공통 헤더의 3-state 인증 UI | 레이아웃 태스크. [layout-spec.md](./layout-spec.md) |
 | Access Token localStorage 저장 | [api-client-spec.md §8](./api-client-spec.md#8-인증-스토어-계약-storesauthts)에서 금지 |
 
 ---
@@ -208,7 +208,7 @@ frontend/nuxt-app/
     └── ja.json
 ```
 
-공통 헤더/푸터는 아직 없으므로 인증 페이지는 `AuthFormShell` 안에서 자체 헤더(로고 → `/`)만 둔다. 메인 페이지(`index.vue`)의 로그인/회원가입 버튼은 각각 `/auth/login`, `/auth/signup`으로 연결한다. 레이아웃 구조는 바꾸지 않는다.
+공통 헤더/푸터는 [layout-spec.md](./layout-spec.md)의 `default` 레이아웃이 담당한다. 인증 페이지는 같은 레이아웃을 쓰고, `AuthFormShell`은 카드와 타이틀만 그린다 (로고는 헤더에 있다).
 
 ### 5.1 `useAuth`
 

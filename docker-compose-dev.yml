@@ -287,6 +287,9 @@ services:
     volumes:
       - ./frontend/nuxt-app:/app
       - nuxt-node-modules:/app/node_modules
+      # 호스트 `npm run dev`가 만든 Windows 경로 .nuxt와 섞이면 Tailwind가
+      # `tailwindConfig.blocklist`에서 터진다. 컨테이너 전용으로 분리한다.
+      - nuxt-dot-nuxt:/app/.nuxt
     networks:
       - rtcdelivery-network
 
@@ -298,4 +301,6 @@ volumes:
   redis-data:
     driver: local
   nuxt-node-modules:
+    driver: local
+  nuxt-dot-nuxt:
     driver: local

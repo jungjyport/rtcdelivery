@@ -525,7 +525,7 @@ const created = await $api.post<Order>('/orders', payload)
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(null)   // 메모리 전용
   const user = ref<AuthUser | null>(null)
-  const isRestoring = ref(false)                 // [ADD] 6.6 세션 복구 진행 중
+  const isRestoring = ref(true)                  // [ADD] 첫 restore 전까지 true. SSR에서 비로그인 버튼을 찍지 않는다
 
   const isLoggedIn = computed(() => accessToken.value !== null)
 
@@ -542,7 +542,7 @@ export const useAuthStore = defineStore('auth', () => {
 |---|---|
 | `accessToken` | **절대 localStorage / sessionStorage / 쿠키에 저장하지 않는다** |
 | `user` | 서버에서 받은 값만 담는다. 클라이언트가 임의 생성하지 않는다 |
-| `isRestoring` | 6.6 복구 흐름 동안 `true`. 개인화 UI는 이 값이 `true`면 로그인/비로그인 어느 쪽도 그리지 않는다 (6.6.1) |
+| `isRestoring` | 앱 기동 시 초깃값 `true`. 6.6 복구가 끝나면 `false`. 개인화 UI는 이 값이 `true`면 로그인/비로그인 어느 쪽도 그리지 않는다 (6.6.1, [layout-spec.md](./layout-spec.md)) |
 | `restoreSession()` | single-flight. 이미 토큰이 있거나 복구 중이면 새 요청을 만들지 않는다. **실패해도 reject 하지 않는다** (비로그인은 정상 상태) |
 | Pinia 영속화 플러그인 | 이 스토어에는 적용하지 않는다 |
 
