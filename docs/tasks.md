@@ -60,6 +60,10 @@
   - [x] i18n `error.*` 인증 에러 코드 추가 ([error-handling.md §3.2](./error-handling.md#32-인증--회원-member-auth-service--api-gateway))
   - [ ] OAuth 진입 (Google / Kakao)
     - _(스펙 미작성)_
+- [x] **마이페이지**
+  - [x] 내 프로필 정보 조회 (`GET /api/v1/auth/me`) 연동
+  - [x] 인증 라우트 가드 (`middleware/auth.ts`) 적용
+  - [x] 헤더 연동 및 i18n (ko/ja) 적용
 - [ ] **음식점 · 메뉴 화면**
   - [ ] 카테고리 목록
   - [ ] 음식점 목록 (SSR 프리페치)
