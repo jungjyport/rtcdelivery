@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,8 +17,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * 인가는 두 단계로 나눈다. 필터 레벨({@code authorizeHttpRequests})이 인증 여부만 판정해
+ * 비로그인 요청을 401로 걸러내고, 역할 검사는 {@code @PreAuthorize}가 담당한다.
+ *
+ * <p>메서드 시큐리티만으로 처리하면 익명 사용자도 403을 받는다. {@code GlobalExceptionHandler}가
+ * {@code AccessDeniedException}을 먼저 잡아 {@code ExceptionTranslationFilter}의 익명/인증 구분이
+ * 적용되지 않기 때문이다.
+ */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 

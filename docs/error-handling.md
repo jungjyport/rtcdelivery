@@ -106,6 +106,7 @@ function isApiResponse(value: unknown): value is ApiResponse<unknown> {
 | `INVALID_CREDENTIALS` | 401 | 로그인 실패 (아이디 없음 / 비밀번호 불일치 **구분하지 않음**) |
 | `MEMBER_NOT_FOUND` | 404 | 존재하지 않는 회원 조회 |
 | `MEMBER_INACTIVE` | 403 | 비활성(`is_active = false`) 계정 |
+| `CANNOT_CHANGE_OWN_ROLE` | 400 | 관리자가 자신의 역할을 변경하려 함 (마지막 관리자 권한 소실 방지) |
 | `ACCESS_TOKEN_EXPIRED` | 401 | Access Token 만료 |
 | `ACCESS_TOKEN_INVALID` | 401 | 서명 불일치 / 형식 오류 / 토큰 누락 |
 | `REFRESH_TOKEN_NOT_FOUND` | 401 | 쿠키에 Refresh Token 없음 |
@@ -119,10 +120,14 @@ function isApiResponse(value: unknown): value is ApiResponse<unknown> {
 각 서비스는 자신의 `ErrorCode` enum에 도메인 코드를 추가합니다. 명명은 `{리소스}_{사유}` 형식을 따릅니다.
 
 ```
-RESTAURANT_NOT_FOUND, FOOD_NOT_FOUND, CATEGORY_NOT_FOUND
+RESTAURANT_NOT_FOUND, RESTAURANT_CLOSED, FOOD_NOT_FOUND, FOOD_UNAVAILABLE
+CATEGORY_NOT_FOUND, DUPLICATE_CATEGORY_CODE, DUPLICATE_CATEGORY_NAME
 ORDER_NOT_FOUND, ORDER_ALREADY_CANCELLED, INVALID_ORDER_STATUS_TRANSITION
 PAYMENT_NOT_FOUND, PAYMENT_ALREADY_COMPLETED, REFUND_NOT_ALLOWED
 ```
+
+> **소유권 위반은 `FORBIDDEN`이 아니라 `RESTAURANT_NOT_FOUND`로 응답합니다.** 남의 음식점을 수정하려는
+> 요청에 403을 주면 "그 ID의 음식점이 존재한다"는 사실이 노출되어 리소스 열거가 가능해집니다.
 
 ---
 

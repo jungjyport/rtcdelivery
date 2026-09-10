@@ -37,6 +37,11 @@ public enum ErrorCode {
     MEMBER_INACTIVE(HttpStatus.FORBIDDEN),
 
     /**
+     * 관리자가 자신의 역할을 스스로 낮춰 마지막 관리자 권한이 사라지는 것을 막는다.
+     */
+    CANNOT_CHANGE_OWN_ROLE(HttpStatus.BAD_REQUEST),
+
+    /**
      * 아이디가 없는 경우와 비밀번호가 틀린 경우를 구분하지 않는다.
      * 구분해 내려주면 공격자가 유효한 아이디를 열거할 수 있다.
      */

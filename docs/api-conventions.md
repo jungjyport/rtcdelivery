@@ -147,7 +147,10 @@ Authorization: Bearer <JWT_ACCESS_TOKEN>
 |---|---|---|
 | `X-User-Id` | `members.id` | 인가 판단의 기준 |
 | `X-User-Name` | `members.username` | 로깅 · 감사 |
-| `X-User-Role` | `ROLE_USER` / `ROLE_ADMIN` | 인가 판단의 기준 |
+| `X-User-Role` | `ROLE_USER` / `ROLE_OWNER` / `ROLE_ADMIN` | 인가 판단의 기준 |
+
+- 회원은 역할을 **하나만** 갖습니다. Spring Security의 `RoleHierarchy`는 쓰지 않고, "로그인한 사용자 전체"를 뜻하는 자리에는 `isAuthenticated()`를, 역할이 특정되는 자리에는 `hasAnyRole(...)`을 명시합니다.
+- **역할 검사와 소유권 검사는 별개입니다.** `ROLE_OWNER`는 "점주인가"만 판정하므로, 자원을 수정할 때는 서비스 계층에서 `ownerId`와 `X-User-Id`를 반드시 대조합니다.
 
 - Gateway는 **클라이언트가 보낸 `X-User-*` 헤더를 항상 제거한 뒤** 자신이 검증한 값으로 덮어씁니다. 인증이 필요 없는 경로에서도 제거는 수행합니다.
 - 하위 서비스는 이 헤더를 신뢰합니다. 따라서 **운영에서 백엔드 서비스 포트를 외부에 노출하지 않습니다.**

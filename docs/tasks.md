@@ -114,6 +114,14 @@
 - [x] **Gateway 헤더 인증** — `HeaderAuthenticationFilter` + `SecurityConfig`를 `authenticated()`로 잠금
   - 스펙: [auth-jwt-spec.md §6](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md#6-security-구성)
   - 선행: api-gateway의 JWT 검증 필터. 헤더가 주입되기 전에는 `/auth/me`가 401만 반환한다
+- [x] **점주 역할(`ROLE_OWNER`) 추가**
+  - 스펙: [role-management-spec.md](./sdd-spec-docs/feature/member-auth-service/role-management-spec.md) _(구현 후 작성)_
+  - `RoleHierarchy`는 쓰지 않는다. 회원은 역할을 하나만 갖고, 로그인 사용자 전체를 뜻하는 자리에는 `isAuthenticated()`를, 역할이 특정되는 자리에는 `hasAnyRole(...)`을 명시한다
+  - [x] `Role` enum에 `ROLE_OWNER` 추가 (`ROLE_USER` / `ROLE_OWNER` / `ROLE_ADMIN`)
+  - [x] `Member.changeRole()` 도메인 메서드 (`@Setter` 금지 규칙 준수)
+  - [x] 승격 API — `PATCH /api/v1/members/{memberId}/role`, `@PreAuthorize("hasRole('ADMIN')")`
+  - [x] `@EnableMethodSecurity` + 자기 자신 강등 차단 (`CANNOT_CHANGE_OWN_ROLE`)
+  - [x] 역할 변경 시 Redis `RT:{username}` 삭제 — 기존 Access Token은 최대 30분간 옛 역할을 유지하므로, 강등이 다음 갱신에서 반영되게 한다
 - [ ] **OAuth 로그인** — Google / Kakao, `AuthProvider` 분기
   - _(스펙 미작성 — 소셜 로그인 플로우 스펙 선행 필요)_
 - [x] **단위 테스트 70% 이상**
@@ -124,21 +132,35 @@
 ## 3. food-catalog-service
 
 > 계약 방식: **Swagger (Code-first)**
+> 설계 스펙: [catalog-spec.md](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md) _(구현 후 작성)_
 
 - [x] **스캐폴딩**
 - [x] **에러 처리 정비** — `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`, `ApiResponse`의 `@JsonInclude` 제거
   - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
-- [ ] **카테고리** — 엔티티 + CRUD API
-- [ ] **음식점(Restaurant)** — 엔티티 + CRUD API + 페이지네이션/정렬
-- [ ] **메뉴(Food)** — 엔티티 + CRUD API
-- [ ] **검색** — 음식점/메뉴 검색
-- [ ] **다국어 데이터 연동**
-  - 스펙: [translation-system.md](./translation-system.md) · [internationalization.md §2-B](./internationalization.md#b-dynamic-domain-data--translation-table)
-  - [ ] `restaurant_translation` / `menu_translation` 스키마
-  - [ ] `Accept-Language` 기반 조회
-  - [ ] 등록/수정 시 번역 요청 이벤트 발행
+- [x] **Gateway 헤더 인증** — `HeaderAuthenticationFilter` + `@EnableMethodSecurity`
+  - 스펙: [gateway-auth-spec.md §4](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md#4-jwtverificationfilter)
+  - member-auth의 필터를 그대로 옮겼다. 이 필터가 없으면 `SecurityContext`가 비어 `@PreAuthorize`가 전부 거부한다
+  - 비로그인 401과 역할 불일치 403을 구분하려면 **필터 레벨에서 `authenticated()`로 먼저 거른다.** `GlobalExceptionHandler`가 `AccessDeniedException`을 잡기 때문에, 메서드 시큐리티에만 의존하면 익명 사용자도 403을 받는다
+- [x] **카테고리** — 엔티티 + CRUD API
+  - 번역 테이블을 두지 않는다. 프론트 i18n `category.{code}` 키가 담당하므로 `code`가 프론트와의 계약이다
+- [x] **음식점(Restaurant)** — 엔티티 + CRUD API + 페이지네이션/정렬
+  - [x] `ownerId` 필드 — 등록 시 `X-User-Id`로 채운다
+  - [x] 쓰기 API에 `hasAnyRole('OWNER','ADMIN')`
+  - [x] 소유권 검증 — 수정/삭제 시 `ownerId`와 현재 사용자 비교. 불일치는 404 (403은 리소스 존재를 노출한다)
+- [x] **메뉴(Food)** — 엔티티 + CRUD API
+  - [x] 소유권 검증 — 소속 음식점의 `ownerId` 경유 + `(foodId, restaurantId)` 동시 조회
+- [x] **검색** — 음식점/메뉴 검색
+  - 원본명과 요청 locale의 번역명을 함께 검색한다. 컬렉션 join 대신 `EXISTS` 서브쿼리를 쓴 이유는 페이지네이션 정확성이다
+- [ ] **다국어 데이터 연동** 🟡
+  - 스펙: [translation-system.md](./translation-system.md) · [internationalization.md §2-B](./internationalization.md#b-dynamic-domain-data--translation-table) · [architecture.md §8.1](./architecture.md#81-번역-데이터-소유권)
+  - [x] `restaurant_translation` / `menu_translation` 스키마 — **food-catalog DB가 소유**한다 (조회 JOIN 때문)
+  - [x] `Accept-Language` 기반 조회 + 번역 부재 시 `ko` 폴백
+  - [x] 원본 텍스트 수정 시 기존 번역 폐기 (옛 원문을 가리키는 번역을 남기지 않는다)
+  - [ ] 등록/수정 시 번역 요청 이벤트 발행 (Outbox 경유)
+  - [ ] `translation-results` 소비 + Inbox 멱등성 → 번역 테이블 upsert
+- [x] **개발용 시드 데이터** — `ddl-auto` + `data.sql` (카테고리 12 · 음식점 4 · 메뉴 10 · 일본어 번역 일부)
 - [ ] **Redis 캐싱** — 메뉴/음식점 조회 캐시
-- [ ] **단위 테스트 70% 이상**
+- [x] **단위 테스트 70% 이상** — JaCoCo 기준 라인 80.6% / 브랜치 73.8% (`gradle check`에 70% 게이트 연결)
 
 ---
 
@@ -227,10 +249,13 @@
 - [ ] **서비스 스캐폴딩** — `backend/translation-service/`
   - 스펙: [translation-system.md](./translation-system.md)
 - [ ] **번역 요청 소비** — `translation-requests` Consumer
+- [ ] **Mock 번역기** — 사전/에코 기반. AI 키 없이 파이프라인을 E2E로 검증한 뒤 실제 API로 교체한다
 - [ ] **번역 결과 발행** — `translation-results` Producer
-- [ ] **Translation DB** — 번역 결과 저장
+- [ ] **Translation DB (`rtc_translation`)** — 번역 이력 · 고유명사 사전 · UGC 번역
+  - 조회용 `restaurant_translation` / `menu_translation`은 이 서비스가 아니라 **food-catalog가 소유**한다 ([architecture.md §8.1](./architecture.md#81-번역-데이터-소유권))
 - [ ] **AI API 연동** — OpenAI / DeepL
 - [ ] **Redis 번역 캐싱** (7일)
+- [ ] **DLQ + Exponential Backoff** — 재시도 소진 시 격리
 - [ ] **UGC 실시간 번역 API** — 리뷰 등
 
 ---
@@ -255,8 +280,8 @@
 | 대상 | 계약 방식 | 스펙 문서 |
 |---|---|---|
 | frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) · [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) · [layout-spec.md](./sdd-spec-docs/feature/nuxt-app/layout-spec.md) |
-| member-auth-service | Swagger (Code-first) | 어노테이션 + [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) |
-| food-catalog-service | Swagger (Code-first) | 어노테이션 + [translation-system.md](./translation-system.md) |
+| member-auth-service | Swagger (Code-first) | 어노테이션 + [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) · [role-management-spec.md](./sdd-spec-docs/feature/member-auth-service/role-management-spec.md) |
+| food-catalog-service | Swagger (Code-first) | 어노테이션 + [catalog-spec.md](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md) · [translation-system.md](./translation-system.md) |
 | order-service | Swagger (Code-first) | 어노테이션 |
 | payment-service | Swagger (Code-first) | 어노테이션 |
 | api-gateway | — | [gateway-auth-spec.md](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md) |

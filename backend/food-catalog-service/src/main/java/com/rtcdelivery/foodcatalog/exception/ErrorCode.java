@@ -35,7 +35,8 @@ public enum ErrorCode {
     FOOD_NOT_FOUND(HttpStatus.NOT_FOUND),
     FOOD_UNAVAILABLE(HttpStatus.CONFLICT),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND),
-    DUPLICATE_CATEGORY_NAME(HttpStatus.CONFLICT);
+    DUPLICATE_CATEGORY_NAME(HttpStatus.CONFLICT),
+    DUPLICATE_CATEGORY_CODE(HttpStatus.CONFLICT);
 
     private final HttpStatus status;
 

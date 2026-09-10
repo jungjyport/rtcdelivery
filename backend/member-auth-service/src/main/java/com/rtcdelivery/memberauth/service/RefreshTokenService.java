@@ -96,6 +96,18 @@ public class RefreshTokenService {
         return new TokenRotationResult(newAccessToken, newRefreshToken);
     }
 
+    /**
+     * 사용자명으로 저장된 Refresh Token을 즉시 폐기한다. 역할 변경·계정 비활성화처럼
+     * 토큰을 손에 쥐고 있지 않은 상태에서 세션을 끊어야 할 때 사용한다.
+     */
+    public void invalidateByUsername(String username) {
+        if (username == null || username.isBlank()) {
+            return;
+        }
+        redisTemplate.delete(REDIS_PREFIX + username);
+        log.info("Invalidated refresh token by username: {}", username);
+    }
+
     public void invalidateRefreshToken(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             return;

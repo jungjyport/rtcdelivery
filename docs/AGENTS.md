@@ -236,6 +236,9 @@ Controller / DTO의 springdoc(Swagger) 어노테이션이 진실의 원천이다
 
 ### 3.8 설정 파일
 
+**비밀값은 `-dev.properties`와 `-prod.properties`에만 쓴다. `application.properties`에는 참고가 필요한 설정만 둔다.**
+
+- `application.properties`는 **gitignore 하지 않고 추적한다.** 서비스가 어떤 설정을 쓰는지 읽을 수 있어야 하므로, 계정·비밀번호·실제 호스트 주소 같은 비밀값은 절대 넣지 않는다. 프로파일 무관 기본값과 참고용 설정만 둔다.
 - `application.properties`에서 `spring.profiles.active=dev`로 프로파일 분리.
 - Compose 네트워크용 Redis/Eureka/Kafka 호스트명은 `application-dev.properties`에 둔다. DB URL은 호스트 PC MySQL의 실제 주소(원격 IP)를 그대로 쓴다. 이 파일은 계정 정보가 들어가므로 gitignore 한다.
 - `application-prod.properties` / `application-local.properties` / `application-secret.properties`는 gitignore. 운영 비밀값은 환경변수로 주입한다.
@@ -501,6 +504,7 @@ test(order): 주문 상태 전이 단위 테스트 추가
 
 - 빌드 산출물, IDE 설정, 로컬 환경파일, `node_modules`, `.gradle`, `.nuxt` 등은 반드시 무시한다.
 - 민감 정보 포함 파일(`.env`, `application-dev.properties`, `application-prod.properties`, `application-secret.properties` 등)은 절대 커밋하지 않는다.
+- 반대로 `application.properties`는 무시하지 않는다. 비밀값을 담지 않는 참고용 설정이므로 추적한다 (§3.8).
 
 ---
 

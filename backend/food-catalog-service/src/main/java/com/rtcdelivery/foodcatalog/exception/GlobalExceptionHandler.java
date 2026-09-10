@@ -4,6 +4,7 @@ import com.rtcdelivery.foodcatalog.common.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -66,9 +67,14 @@ public class GlobalExceptionHandler {
         return toResponse(ErrorCode.VALIDATION_ERROR);
     }
 
+    /**
+     * {@code PropertyReferenceException}은 {@code ?sort=} 에 존재하지 않는 필드명이 오면 발생한다.
+     * 잡지 않으면 클라이언트 입력 오류가 500으로 나간다.
+     */
     @ExceptionHandler({
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class,
+            PropertyReferenceException.class,
     })
     public ResponseEntity<ApiResponse<Void>> handleInvalidParameter(Exception e) {
         log.warn("잘못된 요청 파라미터: {}", e.getMessage());

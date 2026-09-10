@@ -179,6 +179,7 @@ MSA 원칙에 따라 각 서비스는 **독립적인 데이터베이스**를 사
 | member-auth-service | `rtc_member_auth` |
 | order-service | `rtc_order` |
 | payment-service | `rtc_payment` |
+| translation-service (Planned) | `rtc_translation` |
 
 > Discovery Service와 API Gateway는 데이터베이스를 사용하지 않습니다.
 
@@ -191,18 +192,39 @@ Translation Service는 Food Catalog Service와 밀접하게 연동됩니다.
 ```
 Food Catalog Service
         │
-        │ RestaurantCreated / MenuCreated (Kafka)
+        │ ① RestaurantCreated / MenuCreated
+        │    (Kafka: translation-requests, Outbox 경유)
         ▼
 Translation Service
         │
-        │ API Call
+        │ ② API Call
         ▼
     AI API (외부)
         │
-        │ 번역 결과
+        │ ③ 번역 결과
         ▼
-Translation DB (Translation Service 전용)
+Translation DB (translation-service 전용)
+        │
+        │ ④ TranslationCompleted (Kafka: translation-results)
+        ▼
+Food Catalog Service
+        │
+        └─► ⑤ restaurant_translation / menu_translation upsert
+               (food-catalog DB, Inbox 멱등성 적용)
 ```
+
+### 8.1 번역 데이터 소유권
+
+번역 데이터는 **두 곳에 나뉘어** 저장되며 역할이 다릅니다.
+
+| 위치 | 저장 대상 | 역할 |
+|---|---|---|
+| `rtc_translation` (translation-service) | 번역 이력, 고유명사 사전(Glossary), UGC 번역 | 번역 도메인의 원본. 재번역·감사·비용 추적의 기준 |
+| `rtc_food_catalog` (food-catalog-service) | `restaurant_translation`, `menu_translation` | 조회 전용 복제본. 목록/상세 API가 JOIN 한 번으로 읽는다 |
+
+조회 경로는 food-catalog 단독으로 완결됩니다. 번역이 아직 도착하지 않았거나 실패한 경우 원본 언어(`ko`)로 폴백하므로, translation-service가 내려가 있어도 카탈로그 조회는 정상 동작합니다.
+
+> **왜 나누는가**: 음식점 목록 20건을 `ja`로 내려줄 때 번역을 translation-service에 물어보면 요청마다 서비스 간 호출이 발생합니다. Database-per-Service 원칙상 Cross-DB JOIN으로 우회할 수도 없습니다. 그래서 조회에 필요한 번역만 food-catalog DB로 복제하고, `translation-results` 토픽이 그 동기화를 담당합니다.
 
 > 상세 설계는 [translation-system.md](./translation-system.md)를 참조하세요.
 

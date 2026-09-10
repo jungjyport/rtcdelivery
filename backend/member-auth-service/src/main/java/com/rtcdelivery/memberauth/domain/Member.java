@@ -79,4 +79,12 @@ public class Member extends BaseTimeEntity {
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
+
+    /**
+     * 역할을 변경한다. 호출자는 이미 발급된 Access Token이 최대 만료 시간까지
+     * 옛 역할을 유지한다는 점을 고려해, 강등 시 Refresh Token도 함께 무효화해야 한다.
+     */
+    public void changeRole(Role role) {
+        this.role = role;
+    }
 }
