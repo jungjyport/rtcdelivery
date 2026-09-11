@@ -1,3 +1,4 @@
+import { computed, toValue, isRef } from 'vue'
 import type { AsyncData, AsyncDataOptions } from '#app'
 import type { ApiClient, ApiRequestOptions } from '~/types/api'
 import { ApiError } from '~/types/api'
@@ -6,6 +7,7 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 export type UseApiFetchOptions<T> = ApiRequestOptions & AsyncDataOptions<T> & {
   method?: HttpMethod
+  key?: string
 }
 
 export function useApiFetch<T>(
@@ -28,12 +30,15 @@ export function useApiFetch<T>(
     getCachedData,
     enabled,
     method = 'GET',
+    key: customKey,
     ...requestOptions
   } = options
 
-  const resolvedKey = buildApiFetchKey(url, requestOptions.query)
+  const resolvedKey = customKey ?? buildApiFetchKey(url, requestOptions.query)
+  const querySource = isRef(requestOptions.query) ? [requestOptions.query] : []
   const watchSources = [
     locale,
+    ...querySource,
     ...(Array.isArray(watch) ? watch : watch ? [watch] : []),
   ]
 
@@ -90,9 +95,32 @@ function unwrapApiError(error: unknown): ApiError | undefined {
   })
 }
 
+function unwrapValue(val: unknown): any {
+  const unwrapped = toValue(val)
+  if (unwrapped !== null && typeof unwrapped === 'object' && !Array.isArray(unwrapped)) {
+    const res: Record<string, any> = {}
+    for (const [k, v] of Object.entries(unwrapped)) {
+      const inner = toValue(v)
+      if (inner !== undefined) {
+        res[k] = inner
+      }
+    }
+    return res
+  }
+  return unwrapped
+}
+
 function buildApiFetchKey(url: string | (() => string), query: unknown): string {
   const path = typeof url === 'function' ? url() : url
-  return `api:${path}:${query ? JSON.stringify(query) : ''}`
+  const safeQuery = unwrapValue(query)
+  if (!safeQuery || (typeof safeQuery === 'object' && Object.keys(safeQuery).length === 0)) {
+    return `api:${path}`
+  }
+  try {
+    return `api:${path}:${JSON.stringify(safeQuery)}`
+  } catch {
+    return `api:${path}`
+  }
 }
 
 function callApi<T>(
@@ -101,16 +129,21 @@ function callApi<T>(
   method: HttpMethod,
   options: ApiRequestOptions,
 ) {
+  const safeOptions: ApiRequestOptions = {
+    ...options,
+    query: unwrapValue(options.query),
+    body: unwrapValue(options.body),
+  }
   switch (method) {
     case 'POST':
-      return api.post<T>(path, options.body, options)
+      return api.post<T>(path, safeOptions.body, safeOptions)
     case 'PUT':
-      return api.put<T>(path, options.body, options)
+      return api.put<T>(path, safeOptions.body, safeOptions)
     case 'PATCH':
-      return api.patch<T>(path, options.body, options)
+      return api.patch<T>(path, safeOptions.body, safeOptions)
     case 'DELETE':
-      return api.delete<T>(path, options)
+      return api.delete<T>(path, safeOptions)
     default:
-      return api.get<T>(path, options)
+      return api.get<T>(path, safeOptions)
   }
 }

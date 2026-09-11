@@ -44,39 +44,7 @@ export interface SignupRequest {
 // 음식 / 카탈로그 관련 타입
 // ============================================================
 
-export interface Restaurant {
-  id: number
-  name: string
-  description: string
-  address: string
-  phone: string
-  imageUrl: string
-  rating: number
-  deliveryFee: number
-  minOrderAmount: number
-  categoryId: number
-  categoryName: string
-  isOpen: boolean
-}
-
-export interface Food {
-  id: number
-  name: string
-  description: string
-  price: number
-  imageUrl: string
-  restaurantId: number
-  restaurantName: string
-  categoryId: number
-  isAvailable: boolean
-}
-
-export interface Category {
-  id: number
-  name: string
-  iconUrl: string
-  sortOrder: number
-}
+export * from './catalog'
 
 // ============================================================
 // 주문 관련 타입

@@ -60,11 +60,29 @@
   - [x] i18n `error.*` 인증 에러 코드 추가 ([error-handling.md §3.2](./error-handling.md#32-인증--회원-member-auth-service--api-gateway))
   - [ ] OAuth 진입 (Google / Kakao)
     - _(스펙 미작성)_
-- [ ] **음식점 · 메뉴 화면**
-  - [ ] 카테고리 목록
-  - [ ] 음식점 목록 (SSR 프리페치)
-  - [ ] 음식점 상세 · 메뉴 목록
-  - [ ] 검색
+- [x] **음식점 · 메뉴 화면**
+  - 스펙: [catalog-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/catalog-pages-spec.md)
+  - API 계약: [catalog-spec.md](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md)
+  - [x] `types/catalog.ts` 타입 정의 및 `useCatalog.ts` composable
+  - [x] 카테고리 목록 컴포넌트 (`CategoryResponse`, `$t('category.' + code)`)
+  - [x] 음식점 목록 페이지 (`/restaurants`, `useApiFetch` SSR 프리페치, 카테고리 필터, 정렬, 페이지네이션)
+  - [x] 음식점 상세 및 메뉴 목록 페이지 (`/restaurants/:id`, 매장 정보, 메뉴 카드 목록, 품절 표시)
+  - [x] 음식점 & 메뉴 통합 검색 페이지 (`/search`, 음식점/메뉴 탭 분리)
+- [x] **점주 매장 · 메뉴 관리 화면**
+  - 스펙: [owner-store-spec.md](./sdd-spec-docs/feature/nuxt-app/owner-store-spec.md)
+  - API 계약: [catalog-spec.md §3](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md#3-엔드포인트) · [role-management-spec.md](./sdd-spec-docs/feature/member-auth-service/role-management-spec.md)
+  - [x] 점주 권한 가드 미들웨어 (`owner.ts` — `ROLE_OWNER` / `ROLE_ADMIN`)
+  - [x] 글로벌 헤더 내 점주 네비게이션 ('매장 관리') 연동
+  - [x] 점주 매장 목록 및 신규 등록 (`/owner/restaurants`, `POST /api/v1/restaurants`)
+  - [x] 점주 매장 수정/비활성화 및 메뉴 관리 (`/owner/restaurants/:id`, `PATCH/DELETE`, 메뉴 등록/수정/삭제/품절 토글)
+  - [x] `useOwnerStore.ts` composable
+- [x] **관리자 역할 관리 화면**
+  - 스펙: [admin-role-spec.md](./sdd-spec-docs/feature/nuxt-app/admin-role-spec.md)
+  - API 계약: [role-management-spec.md §3](./sdd-spec-docs/feature/member-auth-service/role-management-spec.md#3-역할-변경-api)
+  - [x] 관리자 권한 가드 미들웨어 (`admin.ts` — `ROLE_ADMIN`)
+  - [x] 글로벌 헤더 내 관리자 네비게이션 ('역할 관리') 연동
+  - [x] 회원 역할 승격/강등 UI (`/admin/members`, `PATCH /api/v1/members/:memberId/role`)
+  - [x] `useRoleManagement.ts` composable
 - [ ] **장바구니** — Pinia 스토어 + Drawer UI
 - [ ] **주문 · 결제 화면**
   - [ ] 주문서 작성
@@ -279,7 +297,7 @@
 
 | 대상 | 계약 방식 | 스펙 문서 |
 |---|---|---|
-| frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) · [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) · [layout-spec.md](./sdd-spec-docs/feature/nuxt-app/layout-spec.md) |
+| frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) · [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) · [layout-spec.md](./sdd-spec-docs/feature/nuxt-app/layout-spec.md) · [catalog-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/catalog-pages-spec.md) · [owner-store-spec.md](./sdd-spec-docs/feature/nuxt-app/owner-store-spec.md) · [admin-role-spec.md](./sdd-spec-docs/feature/nuxt-app/admin-role-spec.md) |
 | member-auth-service | Swagger (Code-first) | 어노테이션 + [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) · [role-management-spec.md](./sdd-spec-docs/feature/member-auth-service/role-management-spec.md) |
 | food-catalog-service | Swagger (Code-first) | 어노테이션 + [catalog-spec.md](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md) · [translation-system.md](./translation-system.md) |
 | order-service | Swagger (Code-first) | 어노테이션 |

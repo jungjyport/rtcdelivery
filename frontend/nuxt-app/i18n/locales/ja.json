@@ -18,7 +18,9 @@
   "nav": {
     "home": "ホーム",
     "findRestaurants": "グルメ検索",
-    "orderHistory": "注文履歴"
+    "orderHistory": "注文履歴",
+    "manageStores": "店舗管理",
+    "manageRoles": "権限管理"
   },
   "hero": {
     "badge": "リアルタイム注文 · スピード配達",
@@ -159,5 +161,77 @@
       "emailInvalid": "メールアドレスの形式が正しくありません。",
       "emailLength": "メールアドレスは100文字以内です。"
     }
+  },
+  "catalog": {
+    "title": "お店を探す",
+    "allCategories": "すべて",
+    "sort": {
+      "latest": "新着順",
+      "deliveryFee": "配達料が安い順",
+      "minOrder": "最低注文金額順"
+    },
+    "deliveryFee": "配達料",
+    "minOrderAmount": "最低注文",
+    "freeDelivery": "配送料無料",
+    "currency": "円",
+    "soldOut": "売り切れ",
+    "addToCart": "カートに追加",
+    "addedToCart": "カートに追加しました。",
+    "searchTitle": "検索結果",
+    "searchPlaceholder": "お店やメニューを検索",
+    "searchTabRestaurants": "レストラン",
+    "searchTabFoods": "メニュー",
+    "searchEmpty": "検索結果がありません。",
+    "restaurantInfo": "店舗情報",
+    "address": "住所",
+    "phoneNumber": "電話番号",
+    "noFoods": "登録されたメニューがありません。",
+    "noRestaurants": "登録された店舗がありません。"
+  },
+  "owner": {
+    "title": "店舗管理",
+    "myRestaurants": "マイ店舗一覧",
+    "newRestaurant": "新規店舗登録",
+    "editRestaurant": "店舗情報編集",
+    "deactivateRestaurant": "店舗の無効化",
+    "manageMenu": "メニュー管理",
+    "addFood": "メニュー追加",
+    "editFood": "メニュー編集",
+    "deleteFood": "メニュー削除",
+    "foodSoldOut": "売り切れ状態",
+    "soldOutToggle": "売り切れにする",
+    "inStockToggle": "販売中にする",
+    "saveSuccess": "保存が完了しました。",
+    "deleteConfirm": "本当に削除しますか？",
+    "deactivateConfirm": "本当にこの店舗を無効化しますか？",
+    "categoryLabel": "カテゴリー",
+    "nameLabel": "店舗名",
+    "descriptionLabel": "説明",
+    "addressLabel": "住所",
+    "phoneLabel": "電話番号",
+    "deliveryFeeLabel": "配達料 (円)",
+    "minOrderAmountLabel": "最低注文金額 (円)",
+    "imageUrlLabel": "画像URL",
+    "foodNameLabel": "メニュー名",
+    "priceLabel": "価格 (円)",
+    "displayOrderLabel": "表示順",
+    "save": "保存する",
+    "cancel": "キャンセル",
+    "dangerZone": "危険な操作",
+    "noRestaurants": "登録された店舗がありません。新しい店舗を登録してみましょう！",
+    "noFoods": "登録されたメニューがありません。新しいメニューを追加してみましょう！"
+  },
+  "admin": {
+    "title": "ユーザー権限管理",
+    "subtitle": "ユーザーの権限を店舗オーナーまたは管理者に昇格または変更します。",
+    "memberIdLabel": "ユーザー番号 (ID)",
+    "roleLabel": "変更する権限",
+    "roleUser": "一般ユーザー (ROLE_USER)",
+    "roleOwner": "店舗オーナー (ROLE_OWNER)",
+    "roleAdmin": "管理者 (ROLE_ADMIN)",
+    "submitChange": "権限変更を適用",
+    "changeSuccess": "権限が正常に変更されました。",
+    "tokenNotice": "対象ユーザーのRefresh Tokenが無効化され、次回ログイン/トークン更新時に新しい権限が適用されます。",
+    "selfChangeWarning": "自身のアカウントの権限は変更できません。"
   }
 }

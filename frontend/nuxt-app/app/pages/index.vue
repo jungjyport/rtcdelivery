@@ -32,23 +32,24 @@
           </p>
 
           <!-- Search Bar -->
-          <div class="max-w-xl mx-auto animate-fadeInUp" style="animation-delay: 0.3s;">
+          <form @submit.prevent="onSearch" class="max-w-xl mx-auto animate-fadeInUp" style="animation-delay: 0.3s;">
             <div class="flex items-center bg-white rounded-2xl shadow-xl shadow-surface-900/5 border border-surface-100 p-2 hover:shadow-2xl transition-shadow duration-300">
               <div class="flex items-center gap-2 px-4 flex-1">
                 <svg class="w-5 h-5 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
+                  v-model="heroSearchInput"
                   type="text"
                   :placeholder="$t('hero.searchPlaceholder')"
                   class="w-full py-2 text-surface-900 placeholder-surface-400 outline-none bg-transparent"
                 />
               </div>
-              <button class="btn-primary !rounded-xl !py-2.5 !px-6 shrink-0">
+              <button type="submit" class="btn-primary !rounded-xl !py-2.5 !px-6 shrink-0">
                 {{ $t('common.search') }}
               </button>
             </div>
-          </div>
+          </form>
 
           <!-- Stats -->
           <div class="flex items-center justify-center gap-8 sm:gap-12 mt-12 animate-fadeInUp" style="animation-delay: 0.4s;">
@@ -80,20 +81,21 @@
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div
-            v-for="category in categories"
-            :key="category.key"
+          <NuxtLink
+            v-for="category in displayCategories"
+            :key="category.code"
+            :to="category.id ? `/restaurants?categoryId=${category.id}` : `/restaurants`"
             class="group cursor-pointer"
           >
-            <div class="card p-6 text-center hover:border-primary-200 hover:-translate-y-1 transition-all duration-300">
+            <div class="card p-6 text-center hover:border-primary-200 hover:-translate-y-1 transition-all duration-300 bg-white">
               <div class="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">
                 {{ category.icon }}
               </div>
               <p class="font-semibold text-surface-700 group-hover:text-primary-600 transition-colors duration-200">
-                {{ $t(`category.${category.key}`) }}
+                {{ $t(`category.${category.code}`) }}
               </p>
             </div>
-          </div>
+          </NuxtLink>
         </div>
       </div>
     </section>
@@ -137,9 +139,12 @@
               {{ $t('cta.description') }}
             </p>
             <div class="flex items-center justify-center gap-4">
-              <button class="inline-flex items-center px-8 py-3.5 bg-white text-primary-600 font-bold rounded-xl hover:bg-surface-50 transition-all duration-200 shadow-lg shadow-black/10">
+              <NuxtLink
+                to="/restaurants"
+                class="inline-flex items-center px-8 py-3.5 bg-white text-primary-600 font-bold rounded-xl hover:bg-surface-50 transition-all duration-200 shadow-lg shadow-black/10"
+              >
                 {{ $t('cta.orderNow') }}
-              </button>
+              </NuxtLink>
               <button class="inline-flex items-center px-8 py-3.5 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-200">
                 {{ $t('cta.appDownload') }}
               </button>
@@ -163,21 +168,58 @@ useHead({
 
 const descriptionParts = computed(() => t('hero.description').split('{br}'))
 
-// Categories (icon + key for i18n lookup)
-const categories = [
-  { key: 'korean', icon: '🍚' },
-  { key: 'chinese', icon: '🥡' },
-  { key: 'japanese', icon: '🍣' },
-  { key: 'western', icon: '🍝' },
-  { key: 'chicken', icon: '🍗' },
-  { key: 'pizza', icon: '🍕' },
-  { key: 'burger', icon: '🍔' },
-  { key: 'snack', icon: '🍜' },
-  { key: 'cafe', icon: '☕' },
-  { key: 'dessert', icon: '🍰' },
-  { key: 'lateNight', icon: '🌙' },
-  { key: 'healthy', icon: '🥗' },
-]
+const router = useRouter()
+const { useCategoriesFetch } = useCatalog()
+const { data: serverCategories } = await useCategoriesFetch()
+
+const heroSearchInput = ref('')
+function onSearch() {
+  if (!heroSearchInput.value.trim()) return
+  router.push({
+    path: '/search',
+    query: { q: heroSearchInput.value.trim() },
+  })
+}
+
+// Icon mapping
+const categoryIcons: Record<string, string> = {
+  korean: '🍚',
+  chinese: '🥡',
+  japanese: '🍣',
+  western: '🍝',
+  chicken: '🍗',
+  pizza: '🍕',
+  burger: '🍔',
+  snack: '🍜',
+  cafe: '☕',
+  dessert: '🍰',
+  lateNight: '🌙',
+  healthy: '🥗',
+}
+
+const displayCategories = computed(() => {
+  if (serverCategories.value && serverCategories.value.length > 0) {
+    return serverCategories.value.map(c => ({
+      id: c.id,
+      code: c.code,
+      icon: categoryIcons[c.code] || '🍽️',
+    }))
+  }
+  return [
+    { id: null, code: 'korean', icon: '🍚' },
+    { id: null, code: 'chinese', icon: '🥡' },
+    { id: null, code: 'japanese', icon: '🍣' },
+    { id: null, code: 'western', icon: '🍝' },
+    { id: null, code: 'chicken', icon: '🍗' },
+    { id: null, code: 'pizza', icon: '🍕' },
+    { id: null, code: 'burger', icon: '🍔' },
+    { id: null, code: 'snack', icon: '🍜' },
+    { id: null, code: 'cafe', icon: '☕' },
+    { id: null, code: 'dessert', icon: '🍰' },
+    { id: null, code: 'lateNight', icon: '🌙' },
+    { id: null, code: 'healthy', icon: '🥗' },
+  ]
+})
 
 // Features (icon + key for i18n lookup)
 const features = [

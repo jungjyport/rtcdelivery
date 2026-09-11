@@ -8,6 +8,9 @@ const authStore = useAuthStore()
 const { isRestoring, isLoggedIn, user } = storeToRefs(authStore)
 const { logout, isSubmitting } = useAuth()
 
+const isOwner = computed(() => user.value?.role === 'ROLE_OWNER' || user.value?.role === 'ROLE_ADMIN')
+const isAdmin = computed(() => user.value?.role === 'ROLE_ADMIN')
+
 async function onLogout() {
   if (isSubmitting.value) return
   await logout()
@@ -28,16 +31,33 @@ async function onLogout() {
             </span>
           </NuxtLink>
 
-          <div class="hidden md:flex items-center gap-8">
+          <div class="hidden md:flex items-center gap-6 lg:gap-8">
             <NuxtLink
               to="/"
               class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200"
             >
               {{ t('nav.home') }}
             </NuxtLink>
-            <a href="#" class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200">
+            <NuxtLink
+              to="/restaurants"
+              class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            >
               {{ t('nav.findRestaurants') }}
-            </a>
+            </NuxtLink>
+            <NuxtLink
+              v-if="isOwner"
+              to="/owner/restaurants"
+              class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            >
+              {{ t('nav.manageStores') }}
+            </NuxtLink>
+            <NuxtLink
+              v-if="isAdmin"
+              to="/admin/members"
+              class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            >
+              {{ t('nav.manageRoles') }}
+            </NuxtLink>
             <a href="#" class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200">
               {{ t('nav.orderHistory') }}
             </a>
