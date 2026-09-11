@@ -41,12 +41,6 @@ public class JwtVerificationFilter implements GlobalFilter, Ordered {
             "/swagger-resources/**"
     );
 
-    private static final List<String> PUBLIC_GET_PATH_PATTERNS = List.of(
-            "/api/v1/categories/**",
-            "/api/v1/restaurants/**",
-            "/api/v1/foods/**"
-    );
-
     private final JwtValidator jwtValidator;
     private final ErrorResponseWriter errorResponseWriter;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -78,7 +72,8 @@ public class JwtVerificationFilter implements GlobalFilter, Ordered {
         // 3. Authorization: Bearer <token> 추출
         String authHeader = cleanRequest.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            if (isPublicGet(cleanRequest)) {
+            // GET 요청은 익명 통과 허용 (인가 및 접근 제어는 각 마이크로서비스 SecurityConfig에 위임)
+            if (cleanRequest.getMethod() == HttpMethod.GET) {
                 return chain.filter(cleanExchange);
             }
             log.debug("Missing or invalid Authorization header");
@@ -87,7 +82,7 @@ public class JwtVerificationFilter implements GlobalFilter, Ordered {
 
         String token = authHeader.substring(7).trim();
         if (token.isEmpty()) {
-            if (isPublicGet(cleanRequest)) {
+            if (cleanRequest.getMethod() == HttpMethod.GET) {
                 return chain.filter(cleanExchange);
             }
             log.debug("Empty Bearer token");
@@ -127,20 +122,6 @@ public class JwtVerificationFilter implements GlobalFilter, Ordered {
 
         String path = request.getURI().getPath();
         for (String pattern : EXCLUDE_PATH_PATTERNS) {
-            if (pathMatcher.match(pattern, path)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isPublicGet(ServerHttpRequest request) {
-        if (request.getMethod() != HttpMethod.GET) {
-            return false;
-        }
-
-        String path = request.getURI().getPath();
-        for (String pattern : PUBLIC_GET_PATH_PATTERNS) {
             if (pathMatcher.match(pattern, path)) {
                 return true;
             }

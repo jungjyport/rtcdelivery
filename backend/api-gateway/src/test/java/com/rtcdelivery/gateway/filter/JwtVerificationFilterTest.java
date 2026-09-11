@@ -154,9 +154,9 @@ class JwtVerificationFilterTest {
     }
 
     @Test
-    @DisplayName("인증이 필요한 경로에 토큰이 없으면 401 ACCESS_TOKEN_INVALID 응답이 작성된다")
-    void filter_토큰없음_401_ApiResponse형식() {
-        MockServerHttpRequest request = MockServerHttpRequest.get("/api/v1/orders").build();
+    @DisplayName("토큰이 필요한 non-GET 요청(POST /api/v1/orders)에 토큰이 없으면 401 ACCESS_TOKEN_INVALID 응답이 작성된다")
+    void filter_POST요청_토큰없음_401_ApiResponse형식() {
+        MockServerHttpRequest request = MockServerHttpRequest.post("/api/v1/orders").build();
         MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
         StepVerifier.create(filter.filter(exchange, filterChain))
@@ -185,8 +185,8 @@ class JwtVerificationFilterTest {
     }
 
     @Test
-    @DisplayName("공개 GET 경로(/api/v1/restaurants)는 토큰 없이도 체인이 실행된다")
-    void filter_공개GET경로_음식점목록_토큰없이통과() {
+    @DisplayName("GET 요청은 토큰 없이도 체인이 실행된다 (인가 처리는 각 마이크로서비스에 위임)")
+    void filter_GET요청_토큰없이통과() {
         MockServerHttpRequest request = MockServerHttpRequest.get("/api/v1/restaurants").build();
         MockServerWebExchange exchange = MockServerWebExchange.from(request);
         given(filterChain.filter(any(ServerWebExchange.class))).willReturn(Mono.empty());
@@ -199,23 +199,30 @@ class JwtVerificationFilterTest {
     }
 
     @Test
-    @DisplayName("공개 GET 경로(/api/v1/categories)는 토큰 없이도 체인이 실행된다")
-    void filter_공개GET경로_카테고리_토큰없이통과() {
-        MockServerHttpRequest request = MockServerHttpRequest.get("/api/v1/categories").build();
+    @DisplayName("GET 요청 시 클라이언트가 보낸 위조 헤더는 토큰이 없어도 제거되어 전달된다")
+    void filter_GET요청_토큰없음_위조헤더제거() {
+        MockServerHttpRequest request = MockServerHttpRequest.get("/api/v1/categories")
+                .header("X-User-Role", "ROLE_ADMIN")
+                .header("X-User-Id", "999")
+                .build();
         MockServerWebExchange exchange = MockServerWebExchange.from(request);
         given(filterChain.filter(any(ServerWebExchange.class))).willReturn(Mono.empty());
 
         StepVerifier.create(filter.filter(exchange, filterChain))
                 .verifyComplete();
 
-        verify(filterChain).filter(any(ServerWebExchange.class));
-        verify(jwtValidator, never()).validate(any());
+        ArgumentCaptor<ServerWebExchange> exchangeCaptor = ArgumentCaptor.forClass(ServerWebExchange.class);
+        verify(filterChain).filter(exchangeCaptor.capture());
+
+        ServerWebExchange forwarded = exchangeCaptor.getValue();
+        assertThat(forwarded.getRequest().getHeaders().getFirst("X-User-Id")).isNull();
+        assertThat(forwarded.getRequest().getHeaders().getFirst("X-User-Role")).isNull();
     }
 
     @Test
-    @DisplayName("공개 경로라도 POST 요청(/api/v1/restaurants)에 토큰이 없으면 401을 반환한다")
-    void filter_공개경로_POST_토큰없음_401() {
-        MockServerHttpRequest request = MockServerHttpRequest.post("/api/v1/restaurants").build();
+    @DisplayName("non-GET 요청(DELETE /api/v1/restaurants/1)에 토큰이 없으면 401을 반환한다")
+    void filter_DELETE요청_토큰없음_401() {
+        MockServerHttpRequest request = MockServerHttpRequest.delete("/api/v1/restaurants/1").build();
         MockServerWebExchange exchange = MockServerWebExchange.from(request);
 
         StepVerifier.create(filter.filter(exchange, filterChain))
