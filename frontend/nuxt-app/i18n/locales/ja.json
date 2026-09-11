@@ -9,7 +9,8 @@
     "orderHistory": "注文履歴",
     "order": "注文する",
     "liveTracking": "リアルタイム配達追跡",
-    "appDownload": "アプリダウンロード"
+    "appDownload": "アプリダウンロード",
+    "mypage": "マイページ"
   },
   "header": {
     "greeting": "{name}さん",
@@ -19,6 +20,7 @@
     "home": "ホーム",
     "findRestaurants": "グルメ検索",
     "orderHistory": "注文履歴",
+    "mypage": "マイページ",
     "manageStores": "店舗管理",
     "manageRoles": "権限管理"
   },
@@ -161,6 +163,42 @@
       "emailInvalid": "メールアドレスの形式が正しくありません。",
       "emailLength": "メールアドレスは100文字以内です。"
     }
+  },
+  "mypage": {
+    "title": "マイページ",
+    "subtitle": "会員情報とアカウント設定を確認・管理できます",
+    "statusActive": "正常利用中",
+    "profileCard": "プロフィール情報",
+    "accountDetails": "アカウント詳細",
+    "userId": "会員番号",
+    "username": "ユーザーID",
+    "nickname": "ニックネーム",
+    "email": "メールアドレス",
+    "notSet": "未登録",
+    "role": "会員権限",
+    "authProvider": "登録方法",
+    "createdAt": "登録日時",
+    "roles": {
+      "ROLE_USER": "一般会員",
+      "ROLE_ADMIN": "管理者",
+      "ROLE_RIDER": "配達員"
+    },
+    "providers": {
+      "LOCAL": "一般登録 (ID/パスワード)",
+      "GOOGLE": "Google",
+      "KAKAO": "Kakao"
+    },
+    "quickActions": "クイックメニュー",
+    "orders": "注文履歴",
+    "ordersDesc": "最近の注文状況および過去の注文履歴を確認します。",
+    "explore": "グルメ検索",
+    "exploreDesc": "近くのおいしい出前料理を探してみましょう。",
+    "security": "アカウントセキュリティ",
+    "securityDesc": "パスワード変更やセキュリティ設定を管理します。",
+    "comingSoon": "準備中",
+    "logout": "ログアウト",
+    "reload": "再読み込み",
+    "errorLoading": "会員情報の取得に失敗しました。"
   },
   "catalog": {
     "title": "お店を探す",

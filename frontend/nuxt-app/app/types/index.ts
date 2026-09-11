@@ -40,6 +40,16 @@ export interface SignupRequest {
   email?: string
 }
 
+export interface MemberProfile {
+  id: number
+  username: string
+  nickname: string
+  email?: string
+  role: string
+  authProvider: import('~/stores/authStore').AuthProvider
+  createdAt: string
+}
+
 // ============================================================
 // 음식 / 카탈로그 관련 타입
 // ============================================================

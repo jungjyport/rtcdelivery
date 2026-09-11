@@ -10,6 +10,7 @@ export interface AuthUser {
   role: string
   email?: string
   authProvider?: AuthProvider
+  createdAt?: string
 }
 
 export const useAuthStore = defineStore('auth', () => {

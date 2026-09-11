@@ -60,6 +60,7 @@
   - [x] i18n `error.*` 인증 에러 코드 추가 ([error-handling.md §3.2](./error-handling.md#32-인증--회원-member-auth-service--api-gateway))
   - [ ] OAuth 진입 (Google / Kakao)
     - _(스펙 미작성)_
+<<<<<<< HEAD
 - [x] **음식점 · 메뉴 화면**
   - 스펙: [catalog-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/catalog-pages-spec.md)
   - API 계약: [catalog-spec.md](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md)
@@ -83,6 +84,17 @@
   - [x] 글로벌 헤더 내 관리자 네비게이션 ('역할 관리') 연동
   - [x] 회원 역할 승격/강등 UI (`/admin/members`, `PATCH /api/v1/members/:memberId/role`)
   - [x] `useRoleManagement.ts` composable
+=======
+- [x] **마이페이지**
+  - [x] 내 프로필 정보 조회 (`GET /api/v1/auth/me`) 연동
+  - [x] 인증 라우트 가드 (`middleware/auth.ts`) 적용
+  - [x] 헤더 연동 및 i18n (ko/ja) 적용
+- [ ] **음식점 · 메뉴 화면**
+  - [ ] 카테고리 목록
+  - [ ] 음식점 목록 (SSR 프리페치)
+  - [ ] 음식점 상세 · 메뉴 목록
+  - [ ] 검색
+>>>>>>> b1366d91f99431553c36c1c1a87a9b7fcde51763
 - [ ] **장바구니** — Pinia 스토어 + Drawer UI
 - [ ] **주문 · 결제 화면**
   - [ ] 주문서 작성

@@ -61,6 +61,13 @@ async function onLogout() {
             <a href="#" class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200">
               {{ t('nav.orderHistory') }}
             </a>
+            <NuxtLink
+              v-if="isLoggedIn"
+              to="/mypage"
+              class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            >
+              {{ t('nav.mypage') }}
+            </NuxtLink>
           </div>
 
           <div class="flex items-center gap-3">
@@ -80,12 +87,21 @@ async function onLogout() {
                 v-else-if="isLoggedIn"
                 class="flex items-center gap-3"
               >
-                <span
-                  v-if="user?.nickname"
-                  class="hidden sm:inline max-w-[8rem] truncate text-sm font-medium text-surface-700"
+                <NuxtLink
+                  to="/mypage"
+                  class="flex items-center gap-2 group px-2 py-1 rounded-lg hover:bg-surface-100 transition-colors"
+                  :title="t('common.mypage')"
                 >
-                  {{ t('header.greeting', { name: user.nickname }) }}
-                </span>
+                  <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-primary-500 to-accent-500 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                    {{ (user?.nickname || user?.username || 'U').charAt(0).toUpperCase() }}
+                  </div>
+                  <span
+                    v-if="user?.nickname"
+                    class="hidden sm:inline max-w-[8rem] truncate text-sm font-medium text-surface-700 group-hover:text-primary-600 transition-colors"
+                  >
+                    {{ t('header.greeting', { name: user.nickname }) }}
+                  </span>
+                </NuxtLink>
                 <button
                   type="button"
                   class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200 text-sm disabled:opacity-60"
