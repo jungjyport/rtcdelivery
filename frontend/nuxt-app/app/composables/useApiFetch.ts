@@ -1,4 +1,4 @@
-import { computed, toValue, isRef } from 'vue'
+import { computed, toValue, isRef, type Ref } from 'vue'
 import type { AsyncData, AsyncDataOptions } from '#app'
 import type { ApiClient, ApiRequestOptions } from '~/types/api'
 import { ApiError } from '~/types/api'
@@ -7,7 +7,7 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 export type UseApiFetchOptions<T> = ApiRequestOptions & AsyncDataOptions<T> & {
   method?: HttpMethod
-  key?: string
+  key?: string | (() => string)
 }
 
 export function useApiFetch<T>(
@@ -34,7 +34,12 @@ export function useApiFetch<T>(
     ...requestOptions
   } = options
 
-  const resolvedKey = customKey ?? buildApiFetchKey(url, requestOptions.query)
+  // query가 ref인 경우 () => string 팩토리로 key를 동적 계산 (query 변경 시 캐시 히트 방지)
+  const resolvedKey: string | (() => string) = customKey
+    ?? (isRef(requestOptions.query)
+      ? () => buildApiFetchKey(url, (requestOptions.query as Ref<unknown>).value)
+      : buildApiFetchKey(url, requestOptions.query))
+
   const querySource = isRef(requestOptions.query) ? [requestOptions.query] : []
   const watchSources = [
     locale,

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import CategoryBar from '~/components/food/CategoryBar.vue'
+import SearchBar from '~/components/common/SearchBar.vue'
 import { useCatalog } from '~/composables/useCatalog'
 
 const { t } = useI18n()
@@ -33,12 +34,16 @@ const currentPage = computed(() => {
   return p ? Number(p) : 0
 })
 
+// 이름 검색어 (백엔드 GET /restaurants 의 keyword 파라미터)
+const currentKeyword = computed(() => (route.query.keyword as string) || '')
+
 // API 쿼리 파라미터 반응형 객체
 const queryParams = computed(() => ({
   categoryId: selectedCategoryId.value || undefined,
   sort: currentSort.value,
   page: currentPage.value,
   size: 9,
+  keyword: currentKeyword.value || undefined,
 }))
 
 // 음식점 목록 조회 (SSR 프리페치)
@@ -69,6 +74,16 @@ function onSortChange(event: Event) {
   })
 }
 
+function onSearch(keyword: string) {
+  router.push({
+    query: {
+      ...route.query,
+      keyword: keyword || undefined,
+      page: undefined,
+    },
+  })
+}
+
 function goToPage(p: number) {
   router.push({
     query: {
@@ -84,12 +99,25 @@ function goToPage(p: number) {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- 페이지 헤더 -->
       <div class="mb-8">
-        <h1 class="text-3xl sm:text-4xl font-black text-surface-900 mb-2">
-          {{ t('catalog.title') }}
-        </h1>
-        <p class="text-surface-500">
-          {{ t('category.subtitle') }}
-        </p>
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-4">
+          <div>
+            <h1 class="text-3xl sm:text-4xl font-black text-surface-900 mb-1">
+              {{ t('catalog.title') }}
+            </h1>
+            <p class="text-surface-500">
+              {{ t('category.subtitle') }}
+            </p>
+          </div>
+          <!-- 인라인 서치바 -->
+          <div class="w-full sm:w-80">
+            <SearchBar
+              :placeholder="$t('hero.searchPlaceholder')"
+              :model-value="currentKeyword"
+              size="sm"
+              @search="onSearch"
+            />
+          </div>
+        </div>
       </div>
 
       <!-- 카테고리 칩 바 -->

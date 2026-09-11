@@ -32,24 +32,13 @@
           </p>
 
           <!-- Search Bar -->
-          <form @submit.prevent="onSearch" class="max-w-xl mx-auto animate-fadeInUp" style="animation-delay: 0.3s;">
-            <div class="flex items-center bg-white rounded-2xl shadow-xl shadow-surface-900/5 border border-surface-100 p-2 hover:shadow-2xl transition-shadow duration-300">
-              <div class="flex items-center gap-2 px-4 flex-1">
-                <svg class="w-5 h-5 text-surface-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  v-model="heroSearchInput"
-                  type="text"
-                  :placeholder="$t('hero.searchPlaceholder')"
-                  class="w-full py-2 text-surface-900 placeholder-surface-400 outline-none bg-transparent"
-                />
-              </div>
-              <button type="submit" class="btn-primary !rounded-xl !py-2.5 !px-6 shrink-0">
-                {{ $t('common.search') }}
-              </button>
-            </div>
-          </form>
+          <div class="max-w-xl mx-auto animate-fadeInUp" style="animation-delay: 0.3s;">
+            <SearchBar
+              :placeholder="$t('hero.searchPlaceholder')"
+              size="md"
+              @search="onSearch"
+            />
+          </div>
 
           <!-- Stats -->
           <div class="flex items-center justify-center gap-8 sm:gap-12 mt-12 animate-fadeInUp" style="animation-delay: 0.4s;">
@@ -157,6 +146,8 @@
 </template>
 
 <script setup lang="ts">
+import SearchBar from '~/components/common/SearchBar.vue'
+
 const { t } = useI18n()
 
 useHead({
@@ -172,12 +163,11 @@ const router = useRouter()
 const { useCategoriesFetch } = useCatalog()
 const { data: serverCategories } = await useCategoriesFetch()
 
-const heroSearchInput = ref('')
-function onSearch() {
-  if (!heroSearchInput.value.trim()) return
+function onSearch(q: string) {
+  if (!q) return
   router.push({
     path: '/search',
-    query: { q: heroSearchInput.value.trim() },
+    query: { q },
   })
 }
 

@@ -60,7 +60,6 @@
   - [x] i18n `error.*` 인증 에러 코드 추가 ([error-handling.md §3.2](./error-handling.md#32-인증--회원-member-auth-service--api-gateway))
   - [ ] OAuth 진입 (Google / Kakao)
     - _(스펙 미작성)_
-<<<<<<< HEAD
 - [x] **음식점 · 메뉴 화면**
   - 스펙: [catalog-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/catalog-pages-spec.md)
   - API 계약: [catalog-spec.md](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md)
@@ -69,6 +68,7 @@
   - [x] 음식점 목록 페이지 (`/restaurants`, `useApiFetch` SSR 프리페치, 카테고리 필터, 정렬, 페이지네이션)
   - [x] 음식점 상세 및 메뉴 목록 페이지 (`/restaurants/:id`, 매장 정보, 메뉴 카드 목록, 품절 표시)
   - [x] 음식점 & 메뉴 통합 검색 페이지 (`/search`, 음식점/메뉴 탭 분리)
+  - [x] `SearchBar` 공통 컴포넌트 분리 (`components/common/SearchBar.vue`, size=md/sm, clear 버튼, `@search` 이벤트) — 홈 히어로 & `/restaurants` 인라인 적용
 - [x] **점주 매장 · 메뉴 관리 화면**
   - 스펙: [owner-store-spec.md](./sdd-spec-docs/feature/nuxt-app/owner-store-spec.md)
   - API 계약: [catalog-spec.md §3](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md#3-엔드포인트) · [role-management-spec.md](./sdd-spec-docs/feature/member-auth-service/role-management-spec.md)
@@ -84,17 +84,15 @@
   - [x] 글로벌 헤더 내 관리자 네비게이션 ('역할 관리') 연동
   - [x] 회원 역할 승격/강등 UI (`/admin/members`, `PATCH /api/v1/members/:memberId/role`)
   - [x] `useRoleManagement.ts` composable
-=======
 - [x] **마이페이지**
   - [x] 내 프로필 정보 조회 (`GET /api/v1/auth/me`) 연동
   - [x] 인증 라우트 가드 (`middleware/auth.ts`) 적용
   - [x] 헤더 연동 및 i18n (ko/ja) 적용
-- [ ] **음식점 · 메뉴 화면**
-  - [ ] 카테고리 목록
-  - [ ] 음식점 목록 (SSR 프리페치)
-  - [ ] 음식점 상세 · 메뉴 목록
-  - [ ] 검색
->>>>>>> b1366d91f99431553c36c1c1a87a9b7fcde51763
+- [x] **음식점 · 메뉴 화면**
+  - [x] 카테고리 목록
+  - [x] 음식점 목록 (SSR 프리페치)
+  - [x] 음식점 상세 · 메뉴 목록
+  - [x] 검색
 - [ ] **장바구니** — Pinia 스토어 + Drawer UI
 - [ ] **주문 · 결제 화면**
   - [ ] 주문서 작성
