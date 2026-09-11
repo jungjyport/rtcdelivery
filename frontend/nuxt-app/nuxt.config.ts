@@ -27,7 +27,6 @@ export default defineNuxtConfig({
       { code: 'ja', name: '日本語', file: 'ja.json' },
     ],
     defaultLocale: 'ko',
-    lazy: true,
     langDir: 'locales',
     strategy: 'no_prefix',
     detectBrowserLanguage: {
@@ -40,9 +39,13 @@ export default defineNuxtConfig({
   },
 
   // Runtime Config (환경변수)
+  // Nuxt는 NUXT_API_BASE_URL, NUXT_PUBLIC_API_BASE_URL 환경변수로 런타임에 자동 오버라이드합니다.
   runtimeConfig: {
+    // SSR 서버 전용 (Docker 컨테이너 내부에서는 NUXT_API_BASE_URL=http://api-gateway:8080/api/v1 로 통신)
+    apiBaseUrl: 'http://localhost:8080/api/v1',
+    // 클라이언트 브라우저 전용 (사용자 PC 호스트에서 http://localhost:8080/api/v1 로 통신)
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1',
+      apiBaseUrl: 'http://localhost:8080/api/v1',
     },
   },
 

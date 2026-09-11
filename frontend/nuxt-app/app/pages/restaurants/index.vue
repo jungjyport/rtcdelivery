@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import CategoryBar from '~/components/food/CategoryBar.vue'
+import { useCatalog } from '~/composables/useCatalog'
 
 const { t } = useI18n()
 const route = useRoute()
