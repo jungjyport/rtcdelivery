@@ -183,4 +183,45 @@ class JwtVerificationFilterTest {
         verify(filterChain, never()).filter(any());
         assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
+
+    @Test
+    @DisplayName("공개 GET 경로(/api/v1/restaurants)는 토큰 없이도 체인이 실행된다")
+    void filter_공개GET경로_음식점목록_토큰없이통과() {
+        MockServerHttpRequest request = MockServerHttpRequest.get("/api/v1/restaurants").build();
+        MockServerWebExchange exchange = MockServerWebExchange.from(request);
+        given(filterChain.filter(any(ServerWebExchange.class))).willReturn(Mono.empty());
+
+        StepVerifier.create(filter.filter(exchange, filterChain))
+                .verifyComplete();
+
+        verify(filterChain).filter(any(ServerWebExchange.class));
+        verify(jwtValidator, never()).validate(any());
+    }
+
+    @Test
+    @DisplayName("공개 GET 경로(/api/v1/categories)는 토큰 없이도 체인이 실행된다")
+    void filter_공개GET경로_카테고리_토큰없이통과() {
+        MockServerHttpRequest request = MockServerHttpRequest.get("/api/v1/categories").build();
+        MockServerWebExchange exchange = MockServerWebExchange.from(request);
+        given(filterChain.filter(any(ServerWebExchange.class))).willReturn(Mono.empty());
+
+        StepVerifier.create(filter.filter(exchange, filterChain))
+                .verifyComplete();
+
+        verify(filterChain).filter(any(ServerWebExchange.class));
+        verify(jwtValidator, never()).validate(any());
+    }
+
+    @Test
+    @DisplayName("공개 경로라도 POST 요청(/api/v1/restaurants)에 토큰이 없으면 401을 반환한다")
+    void filter_공개경로_POST_토큰없음_401() {
+        MockServerHttpRequest request = MockServerHttpRequest.post("/api/v1/restaurants").build();
+        MockServerWebExchange exchange = MockServerWebExchange.from(request);
+
+        StepVerifier.create(filter.filter(exchange, filterChain))
+                .verifyComplete();
+
+        verify(filterChain, never()).filter(any());
+        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
 }

@@ -41,6 +41,12 @@ public class JwtVerificationFilter implements GlobalFilter, Ordered {
             "/swagger-resources/**"
     );
 
+    private static final List<String> PUBLIC_GET_PATH_PATTERNS = List.of(
+            "/api/v1/categories/**",
+            "/api/v1/restaurants/**",
+            "/api/v1/foods/**"
+    );
+
     private final JwtValidator jwtValidator;
     private final ErrorResponseWriter errorResponseWriter;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
@@ -72,12 +78,18 @@ public class JwtVerificationFilter implements GlobalFilter, Ordered {
         // 3. Authorization: Bearer <token> 추출
         String authHeader = cleanRequest.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            if (isPublicGet(cleanRequest)) {
+                return chain.filter(cleanExchange);
+            }
             log.debug("Missing or invalid Authorization header");
             return errorResponseWriter.write(cleanExchange, ErrorCode.ACCESS_TOKEN_INVALID);
         }
 
         String token = authHeader.substring(7).trim();
         if (token.isEmpty()) {
+            if (isPublicGet(cleanRequest)) {
+                return chain.filter(cleanExchange);
+            }
             log.debug("Empty Bearer token");
             return errorResponseWriter.write(cleanExchange, ErrorCode.ACCESS_TOKEN_INVALID);
         }
@@ -115,6 +127,20 @@ public class JwtVerificationFilter implements GlobalFilter, Ordered {
 
         String path = request.getURI().getPath();
         for (String pattern : EXCLUDE_PATH_PATTERNS) {
+            if (pathMatcher.match(pattern, path)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isPublicGet(ServerHttpRequest request) {
+        if (request.getMethod() != HttpMethod.GET) {
+            return false;
+        }
+
+        String path = request.getURI().getPath();
+        for (String pattern : PUBLIC_GET_PATH_PATTERNS) {
             if (pathMatcher.match(pattern, path)) {
                 return true;
             }
