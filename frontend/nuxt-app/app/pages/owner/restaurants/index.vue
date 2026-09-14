@@ -41,8 +41,8 @@ async function loadData() {
     ])
     restaurants.value = restRes.content || []
     categories.value = catRes || []
-    if (categories.value.length > 0 && !form.value.categoryId) {
-      form.value.categoryId = categories.value[0].id
+    if ( categories.value.length > 0 && !form.value.categoryId) {
+      form.value.categoryId = categories.value[0]!.id
     }
   } catch (e) {
     // 에러 처리

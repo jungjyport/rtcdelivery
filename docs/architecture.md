@@ -41,12 +41,13 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
      ┌──────▼──────┐               ┌──────▼──────┐
      │ Translation │               │  Payment    │
      │   Service   │               │   Service   │
-     │  (Planned)  │               │ (port 8084) │
+     │ (port 8085) │               │ (port 8084) │
      └──────┬──────┘               └─────────────┘
             │
      ┌──────▼──────┐
-     │   AI API    │
-     │  (Planned)  │
+     │   Gemini    │
+     │ Developer   │
+     │    API      │
      └─────────────┘
 ```
 
@@ -79,14 +80,10 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 | **member-auth-service** | 8082 | 회원가입/로그인, JWT 발급, 회원 정보 관리 | 스캐폴딩 완료 |
 | **order-service** | 8083 | 주문 생성/관리, 배달 상태 추적, 실시간 알림 | 스캐폴딩 완료 |
 | **payment-service** | 8084 | 결제 처리, 결제 내역 관리, 환불 | 스캐폴딩 완료 |
+| **translation-service** | 8085 | Gemini 기반 콘텐츠 번역, 번역 이력·사전 관리 | 스캐폴딩 착수 |
 
-### 향후 추가 예정 서비스 (Planned)
-
-| 서비스 | 역할 |
-|---|---|
-| **translation-service** | AI 기반 콘텐츠 번역, 번역 결과 저장/캐싱 |
-
-> **원칙**: 기존 서비스를 임의로 추가/삭제하지 않습니다. Translation Service는 별도 서비스로 추가될 예정이나, 현 단계에서는 설계만 합니다.
+> **원칙**: 기존 서비스를 임의로 추가/삭제하지 않습니다. translation-service는 Spring Initializr 산출물만 있는 상태이며,
+> 설계는 [translation-pipeline-spec.md](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)를 따릅니다.
 
 ---
 
@@ -165,7 +162,11 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 | food-catalog-service | 메뉴/음식점 캐싱 |
 | member-auth-service | Refresh Token 저장, 세션 관리 |
 | order-service | 실시간 주문 상태 캐싱 |
-| translation-service (Planned) | 번역 결과 캐싱 |
+| translation-service | AI 쿼터 카운터(RPM/RPD), UGC 사용자별 일일 상한 |
+
+> translation-service는 **번역 결과를 Redis에 캐싱하지 않습니다.** 재사용 lookup은 `translation_history`(원문 해시 단위)와
+> `ugc_translation` 테이블이 담당하고, Redis는 인스턴스 간에 공유해야 하는 짧은 수명의 카운터에만 씁니다.
+> 근거는 [ugc-translation-spec.md §2.1](./sdd-spec-docs/feature/translation-service/ugc-translation-spec.md)을 참조하세요.
 
 ---
 
@@ -226,7 +227,9 @@ Food Catalog Service
 
 > **왜 나누는가**: 음식점 목록 20건을 `ja`로 내려줄 때 번역을 translation-service에 물어보면 요청마다 서비스 간 호출이 발생합니다. Database-per-Service 원칙상 Cross-DB JOIN으로 우회할 수도 없습니다. 그래서 조회에 필요한 번역만 food-catalog DB로 복제하고, `translation-results` 토픽이 그 동기화를 담당합니다.
 
-> 상세 설계는 [translation-system.md](./translation-system.md)를 참조하세요.
+> 개요는 [translation-system.md](./translation-system.md), 구현 계약은
+> [translation-pipeline-spec.md](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)와
+> [gemini-provider-spec.md](./sdd-spec-docs/feature/translation-service/gemini-provider-spec.md)를 참조하세요.
 
 ---
 

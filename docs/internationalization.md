@@ -81,9 +81,9 @@ restaurant_translation
 
 **예시**: 리뷰, 문의 내용
 
-**처리 방법**: 사용자 요청 시 Translation Service → AI API → 캐싱
+**처리 방법**: 사용자가 [번역] 버튼을 누를 때 Translation Service → Gemini. 토글은 프론트 메모리, 다른 사용자 재요청은 `ugc_translation` 테이블이 막는다.
 
-> 상세 설계는 [translation-system.md](./translation-system.md)를 참조하세요.
+> 상세 설계는 [ugc-translation-spec.md](./sdd-spec-docs/feature/translation-service/ugc-translation-spec.md)를 참조하세요.
 
 ---
 

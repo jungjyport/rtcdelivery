@@ -102,16 +102,20 @@
 ---
 
 ### Phase 11: Translation Service ⚪ (Planned)
-- [ ] 별도 Translation Microservice 구축
-- [ ] Food Catalog 비동기 번역 이벤트 소비 (Kafka Consumer)
-- [ ] DB Translation 테이블 자동 저장
+> 스펙: [translation-pipeline-spec.md](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)
+
+- [ ] translation-service 스캐폴딩 (포트 8085, DB `rtc_translation`, Eureka + Gateway 라우팅)
+- [ ] Food Catalog 비동기 번역 이벤트 소비 (`translation-requests` → 잡 큐)
+- [ ] `translation-results` 발행 후 food-catalog 조회용 테이블 upsert
 
 ---
 
 ### Phase 12: AI Translation Integration ⚪ (Planned)
-- [ ] OpenAI / DeepL API 연동
-- [ ] UGC (리뷰) 실시간 번역 API 구현
-- [ ] 번역 결과 Redis 7일 캐싱
+> 스펙: [gemini-provider-spec.md](./sdd-spec-docs/feature/translation-service/gemini-provider-spec.md) · [ugc-translation-spec.md](./sdd-spec-docs/feature/translation-service/ugc-translation-spec.md)
+
+- [ ] Gemini Developer API 연동 (`gemini-3.5-flash-lite`, Interactions API). Vertex는 사용하지 않음
+- [ ] UGC 온디맨드 번역 API (`POST /api/v1/translations/ugc`) + 프론트 토글
+- [ ] 무료 쿼터 가드 (Redis RPM/RPD). 번역 결과 Redis 캐시는 두지 않음
 
 ---
 

@@ -13,6 +13,7 @@
 | food-catalog-service | Spring MVC | 동일 |
 | order-service | Spring MVC | 동일 |
 | payment-service | Spring MVC | 동일 |
+| translation-service | Spring MVC | 동일 |
 | api-gateway | Spring WebFlux | `ErrorWebExceptionHandler` — `GatewayErrorWebExceptionHandler` |
 | discovery-service | — | 도메인 API가 없으므로 제외 |
 
@@ -124,14 +125,17 @@ RESTAURANT_NOT_FOUND, RESTAURANT_CLOSED, FOOD_NOT_FOUND, FOOD_UNAVAILABLE
 CATEGORY_NOT_FOUND, DUPLICATE_CATEGORY_CODE, DUPLICATE_CATEGORY_NAME
 ORDER_NOT_FOUND, ORDER_ALREADY_CANCELLED, INVALID_ORDER_STATUS_TRANSITION
 PAYMENT_NOT_FOUND, PAYMENT_ALREADY_COMPLETED, REFUND_NOT_ALLOWED
+TRANSLATION_QUOTA_EXCEEDED, TRANSLATION_UNAVAILABLE, TRANSLATION_TEXT_TOO_LONG, UNSUPPORTED_TARGET_LOCALE
 ```
+
+번역 코드의 HTTP 매핑과 프론트 동작은 [ugc-translation-spec.md §3.6](./sdd-spec-docs/feature/translation-service/ugc-translation-spec.md#36-에러)을 따릅니다.
 
 > **소유권 위반은 `FORBIDDEN`이 아니라 `RESTAURANT_NOT_FOUND`로 응답합니다.** 남의 음식점을 수정하려는
 > 요청에 403을 주면 "그 ID의 음식점이 존재한다"는 사실이 노출되어 리소스 열거가 가능해집니다.
 
 ---
 
-## 4. MVC 서비스 구현 (member-auth / food-catalog / order / payment)
+## 4. MVC 서비스 구현 (member-auth / food-catalog / order / payment / translation)
 
 패키지: `{base-package}.exception`
 
