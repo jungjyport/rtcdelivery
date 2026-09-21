@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
+                        .requestMatchers("/api/v1/translations/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/translations/ugc").authenticated()
                         .anyRequest().authenticated()
                 )

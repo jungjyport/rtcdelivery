@@ -95,6 +95,12 @@ public class TranslationJob extends BaseTimeEntity {
         this.lastError = abbreviate(error);
     }
 
+    public void resetForRetry() {
+        this.status = JobStatus.PENDING;
+        this.retryCount = 0;
+        this.nextRetryAt = LocalDateTime.now();
+    }
+
     private static String abbreviate(String str) {
         if (str == null) return null;
         return str.length() > 500 ? str.substring(0, 500) : str;

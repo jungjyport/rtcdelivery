@@ -22,7 +22,12 @@
     "orderHistory": "注文履歴",
     "mypage": "マイページ",
     "manageStores": "店舗管理",
-    "manageRoles": "権限管理"
+    "manageRoles": "権限管理",
+    "manageTranslations": "翻訳管理"
+  },
+  "adminTranslations": {
+    "title": "翻訳ジョブ管理",
+    "subtitle": "非同期メニュー翻訳ジョブのステータス監視および手動再試行(Retry)"
   },
   "hero": {
     "badge": "リアルタイム注文 · スピード配達",

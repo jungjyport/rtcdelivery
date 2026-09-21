@@ -58,6 +58,13 @@ async function onLogout() {
             >
               {{ t('nav.manageRoles') }}
             </NuxtLink>
+            <NuxtLink
+              v-if="isAdmin"
+              to="/admin/translations"
+              class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200"
+            >
+              {{ t('nav.manageTranslations') }}
+            </NuxtLink>
             <a href="#" class="text-surface-600 hover:text-primary-500 font-medium transition-colors duration-200">
               {{ t('nav.orderHistory') }}
             </a>

@@ -2,6 +2,8 @@ package com.rtcdelivery.translation.repository;
 
 import com.rtcdelivery.translation.domain.JobStatus;
 import com.rtcdelivery.translation.domain.TranslationJob;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,4 +34,18 @@ public interface TranslationJobRepository extends JpaRepository<TranslationJob, 
     int supersedePendingJobs(@Param("restaurantId") Long restaurantId, @Param("targetLocale") String targetLocale);
 
     List<TranslationJob> findByRestaurantIdAndTargetLocale(Long restaurantId, String targetLocale);
+
+    Page<TranslationJob> findByStatusOrderByCreatedAtDesc(JobStatus status, Pageable pageable);
+
+    Page<TranslationJob> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            UPDATE TranslationJob j
+            SET j.status = 'PENDING',
+                j.retryCount = 0,
+                j.nextRetryAt = :now
+            WHERE j.status = 'FAILED'
+            """)
+    int retryAllFailedJobs(@Param("now") LocalDateTime now);
 }

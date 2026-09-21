@@ -22,7 +22,12 @@
     "orderHistory": "주문내역",
     "manageStores": "매장 관리",
     "manageRoles": "역할 관리",
+    "manageTranslations": "번역 관리",
     "mypage": "마이페이지"
+  },
+  "adminTranslations": {
+    "title": "번역 작업 관리",
+    "subtitle": "비동기 메뉴 번역 작업 상태 모니터링 및 수동 재시도(Retry)"
   },
   "hero": {
     "badge": "실시간 주문 · 빠른 배달",
