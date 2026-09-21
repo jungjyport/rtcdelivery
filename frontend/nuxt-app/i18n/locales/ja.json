@@ -133,7 +133,16 @@
     "NETWORK_ERROR": "ネットワーク接続を確認してください。",
     "REQUEST_TIMEOUT": "リクエストがタイムアウトしました。",
     "INVALID_RESPONSE": "サーバーの応答を処理できません。",
-    "UNKNOWN_ERROR": "不明なエラーが発生しました。"
+    "UNKNOWN_ERROR": "不明なエラーが発生しました。",
+    "TRANSLATION_QUOTA_EXCEEDED": "翻訳リクエストが多いため、しばらくしてからお試しください。",
+    "TRANSLATION_UNAVAILABLE": "翻訳サービスを利用できません。",
+    "TRANSLATION_TEXT_TOO_LONG": "翻訳可能な長さを超えています。",
+    "UNSUPPORTED_TARGET_LOCALE": "サポートされていない言語です。"
+  },
+  "translation": {
+    "showTranslation": "翻訳を表示",
+    "showOriginal": "原文を表示",
+    "aiTranslated": "AI翻訳"
   },
   "auth": {
     "loginTitle": "ログイン",

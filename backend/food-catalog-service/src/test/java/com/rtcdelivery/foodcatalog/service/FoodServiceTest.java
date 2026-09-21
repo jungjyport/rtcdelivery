@@ -25,6 +25,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.never;
@@ -44,6 +45,9 @@ class FoodServiceTest {
 
     @Mock
     private RestaurantService restaurantService;
+
+    @Mock
+    private OutboxService outboxService;
 
     @InjectMocks
     private FoodService foodService;
@@ -112,6 +116,7 @@ class FoodServiceTest {
 
         assertThat(result.name()).isEqualTo("된장찌개");
         assertThat(result.price()).isEqualTo(8500);
+        verify(outboxService).recordTranslationRequest(eq(RESTAURANT_ID), eq("CREATED"), any());
     }
 
     @Test
@@ -127,6 +132,7 @@ class FoodServiceTest {
                 .isInstanceOf(BusinessException.class);
 
         verify(foodRepository, never()).save(any(Food.class));
+        verify(outboxService, never()).recordTranslationRequest(any(), any(), any());
     }
 
     @Test
@@ -156,6 +162,7 @@ class FoodServiceTest {
         foodService.update(RESTAURANT_ID, 10L, request, actor, "ko");
 
         assertThat(food.getTranslations()).isEmpty();
+        verify(outboxService).recordTranslationRequest(eq(RESTAURANT_ID), eq("UPDATED"), any());
     }
 
     @Test
@@ -171,6 +178,7 @@ class FoodServiceTest {
 
         assertThat(food.getTranslations()).hasSize(1);
         assertThat(food.getPrice()).isEqualTo(11000);
+        verify(outboxService, never()).recordTranslationRequest(any(), any(), any());
     }
 
     @Test

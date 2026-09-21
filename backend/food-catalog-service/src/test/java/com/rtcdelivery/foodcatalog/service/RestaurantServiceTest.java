@@ -50,6 +50,9 @@ class RestaurantServiceTest {
     @Mock
     private FoodRepository foodRepository;
 
+    @Mock
+    private OutboxService outboxService;
+
     @InjectMocks
     private RestaurantService restaurantService;
 
@@ -137,6 +140,7 @@ class RestaurantServiceTest {
         ArgumentCaptor<Restaurant> captor = ArgumentCaptor.forClass(Restaurant.class);
         verify(restaurantRepository).save(captor.capture());
         assertThat(captor.getValue().getOwnerId()).isEqualTo(OWNER_ID);
+        verify(outboxService).recordTranslationRequest(any(), eq("CREATED"), any());
     }
 
     @Test
@@ -196,6 +200,7 @@ class RestaurantServiceTest {
 
         assertThat(restaurant.getTranslations()).isEmpty();
         assertThat(restaurant.resolveName("ja")).isEqualTo("바뀐 이름");
+        verify(outboxService).recordTranslationRequest(eq(1L), eq("UPDATED"), any());
     }
 
     @Test
@@ -212,6 +217,7 @@ class RestaurantServiceTest {
 
         assertThat(restaurant.getTranslations()).hasSize(1);
         assertThat(restaurant.getDeliveryFee()).isEqualTo(5000);
+        verify(outboxService, org.mockito.Mockito.never()).recordTranslationRequest(any(), any(), any());
     }
 
     @Test

@@ -179,14 +179,14 @@
   - [x] 소유권 검증 — 소속 음식점의 `ownerId` 경유 + `(foodId, restaurantId)` 동시 조회
 - [x] **검색** — 음식점/메뉴 검색
   - 원본명과 요청 locale의 번역명을 함께 검색한다. 컬렉션 join 대신 `EXISTS` 서브쿼리를 쓴 이유는 페이지네이션 정확성이다
-- [ ] **다국어 데이터 연동** 🟡
+- [x] **다국어 데이터 연동**
   - 스펙: [translation-system.md](./translation-system.md) · [internationalization.md §2-B](./internationalization.md#b-dynamic-domain-data--translation-table) · [architecture.md §8.1](./architecture.md#81-번역-데이터-소유권)
   - [x] `restaurant_translation` / `menu_translation` 스키마 — **food-catalog DB가 소유**한다 (조회 JOIN 때문)
   - [x] `Accept-Language` 기반 조회 + 번역 부재 시 `ko` 폴백
   - [x] 원본 텍스트 수정 시 기존 번역 폐기 (옛 원문을 가리키는 번역을 남기지 않는다)
-  - [ ] 등록/수정 시 번역 요청 이벤트 발행 (Outbox 경유)
+  - [x] 등록/수정 시 번역 요청 이벤트 발행 (Outbox 경유)
     - 스펙: [translation-pipeline-spec.md §6.1](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)
-  - [ ] `translation-results` 소비 + Inbox 멱등성 → 번역 테이블 upsert
+  - [x] `translation-results` 소비 + Inbox 멱등성 → 번역 테이블 upsert
     - 스펙: [translation-pipeline-spec.md §6.2](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)
 - [x] **개발용 시드 데이터** — `ddl-auto` + `data.sql` (카테고리 12 · 음식점 4 · 메뉴 10 · 일본어 번역 일부)
 - [ ] **Redis 캐싱** — 메뉴/음식점 조회 캐시
@@ -272,24 +272,23 @@
 
 ---
 
-## 8. translation-service 🟡
-
-> 백엔드는 Spring Initializr 산출물만 있는 상태입니다. 구현은 [AGENTS.md §10.3](./AGENTS.md)과 아래 스펙을 따릅니다.
+## 8. translation-service
+ 
 > 계약 방식: **Swagger (Code-first)**
-
-- [ ] **서비스 스캐폴딩** — `backend/translation-service/` (포트 8085, DB `rtc_translation`)
+ 
+- [x] **서비스 스캐폴딩** — `backend/translation-service/` (포트 8085, DB `rtc_translation`)
   - 스펙: [translation-pipeline-spec.md §1](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)
-- [ ] **번역 요청 소비** — `translation-requests` Consumer + Inbox + `translation_job` 적재
+- [x] **번역 요청 소비** — `translation-requests` Consumer + Inbox + `translation_job` 적재
   - 스펙: [translation-pipeline-spec.md §2–§3](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)
-- [ ] **번역 결과 발행** — `translation-results` Producer (Outbox)
-- [ ] **Translation DB (`rtc_translation`)** — 잡 큐 · 번역 이력 · 고유명사 사전 · UGC 번역
+- [x] **번역 결과 발행** — `translation-results` Producer (Outbox)
+- [x] **Translation DB (`rtc_translation`)** — 잡 큐 · 번역 이력 · 고유명사 사전 · UGC 번역
   - 조회용 `restaurant_translation` / `menu_translation`은 이 서비스가 아니라 **food-catalog가 소유**한다 ([architecture.md §8.1](./architecture.md#81-번역-데이터-소유권))
-- [ ] **AI API 연동** — Gemini Developer API (`gemini-3.5-flash-lite`, Interactions API)
+- [x] **AI API 연동** — Gemini Developer API (`gemini-3.5-flash-lite`, Interactions API)
   - 스펙: [gemini-provider-spec.md](./sdd-spec-docs/feature/translation-service/gemini-provider-spec.md)
   - Vertex AI는 쓰지 않는다. 상시 무료 티어가 없고, Cloud $300 크레딧은 Gemini Developer API에 적용되지 않는다
-- [ ] **무료 쿼터 가드** — Redis RPM/RPD 카운터 + 3단 게이트(Glossary → 이력 → AI). 번역 결과 Redis 캐시는 두지 않는다
-- [ ] **DLQ + Exponential Backoff** — 재시도 소진 시 격리. 쿼터 소진은 `retry_count`를 올리지 않고 다음 날로 미룬다
-- [ ] **UGC 실시간 번역 API** — `POST /api/v1/translations/ugc`. X의 [번역] 버튼과 동일 (프론트 메모리 토글, 새로고침 시 증발)
+- [x] **무료 쿼터 가드** — Redis RPM/RPD 카운터 + 3단 게이트(Glossary → 이력 → AI). 번역 결과 Redis 캐시는 두지 않는다
+- [x] **DLQ + Exponential Backoff** — 재시도 소진 시 격리. 쿼터 소진은 `retry_count`를 올리지 않고 다음 날로 미룬다
+- [x] **UGC 실시간 번역 API** — `POST /api/v1/translations/ugc`. X의 [번역] 버튼과 동일 (프론트 메모리 토글, 새로고침 시 증발)
   - 스펙: [ugc-translation-spec.md](./sdd-spec-docs/feature/translation-service/ugc-translation-spec.md)
 
 ---

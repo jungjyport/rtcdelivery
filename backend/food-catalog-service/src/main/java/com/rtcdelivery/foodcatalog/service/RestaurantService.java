@@ -3,6 +3,7 @@ package com.rtcdelivery.foodcatalog.service;
 import com.rtcdelivery.foodcatalog.domain.Category;
 import com.rtcdelivery.foodcatalog.domain.Food;
 import com.rtcdelivery.foodcatalog.domain.Restaurant;
+import com.rtcdelivery.foodcatalog.dto.event.TranslationRequestPayload;
 import com.rtcdelivery.foodcatalog.dto.request.RestaurantCreateRequest;
 import com.rtcdelivery.foodcatalog.dto.request.RestaurantUpdateRequest;
 import com.rtcdelivery.foodcatalog.dto.response.PageResponse;
@@ -31,6 +32,7 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
     private final FoodRepository foodRepository;
+    private final OutboxService outboxService;
 
     @Transactional(readOnly = true)
     public PageResponse<RestaurantResponse> search(Long categoryId,
@@ -69,6 +71,17 @@ public class RestaurantService {
         Restaurant saved = restaurantRepository.save(restaurant);
         log.info("Restaurant created: id={}, ownerId={}", saved.getId(), actor.memberId());
 
+        outboxService.recordTranslationRequest(
+                saved.getId(),
+                "CREATED",
+                List.of(new TranslationRequestPayload.RequestEntry(
+                        "RESTAURANT",
+                        saved.getId(),
+                        saved.getName(),
+                        saved.getDescription()
+                ))
+        );
+
         return RestaurantResponse.of(saved, locale);
     }
 
@@ -104,6 +117,17 @@ public class RestaurantService {
             // 기존 번역은 옛 원문을 가리키므로 버린다. 재번역이 도착할 때까지 원본(ko)으로 폴백된다.
             restaurant.clearTranslations();
             log.info("Restaurant translations invalidated by source text change: id={}", restaurantId);
+
+            outboxService.recordTranslationRequest(
+                    restaurantId,
+                    "UPDATED",
+                    List.of(new TranslationRequestPayload.RequestEntry(
+                            "RESTAURANT",
+                            restaurantId,
+                            restaurant.getName(),
+                            restaurant.getDescription()
+                    ))
+            );
         }
 
         return RestaurantResponse.of(restaurant, locale);

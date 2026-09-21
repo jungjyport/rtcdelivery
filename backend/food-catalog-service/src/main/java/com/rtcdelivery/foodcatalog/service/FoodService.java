@@ -2,6 +2,7 @@ package com.rtcdelivery.foodcatalog.service;
 
 import com.rtcdelivery.foodcatalog.domain.Food;
 import com.rtcdelivery.foodcatalog.domain.Restaurant;
+import com.rtcdelivery.foodcatalog.dto.event.TranslationRequestPayload;
 import com.rtcdelivery.foodcatalog.dto.request.FoodCreateRequest;
 import com.rtcdelivery.foodcatalog.dto.request.FoodUpdateRequest;
 import com.rtcdelivery.foodcatalog.dto.response.FoodResponse;
@@ -32,6 +33,7 @@ public class FoodService {
     private final FoodRepository foodRepository;
     private final RestaurantRepository restaurantRepository;
     private final RestaurantService restaurantService;
+    private final OutboxService outboxService;
 
     @Transactional(readOnly = true)
     public List<FoodResponse> findByRestaurant(Long restaurantId, String locale) {
@@ -70,6 +72,17 @@ public class FoodService {
         Food saved = foodRepository.save(food);
         log.info("Food created: id={}, restaurantId={}", saved.getId(), restaurantId);
 
+        outboxService.recordTranslationRequest(
+                restaurantId,
+                "CREATED",
+                List.of(new TranslationRequestPayload.RequestEntry(
+                        "MENU",
+                        saved.getId(),
+                        saved.getName(),
+                        saved.getDescription()
+                ))
+        );
+
         return FoodResponse.of(saved, locale);
     }
 
@@ -102,6 +115,17 @@ public class FoodService {
             // 기존 번역은 옛 원문을 가리키므로 버린다. 재번역이 도착할 때까지 원본(ko)으로 폴백된다.
             food.clearTranslations();
             log.info("Food translations invalidated by source text change: id={}", foodId);
+
+            outboxService.recordTranslationRequest(
+                    restaurantId,
+                    "UPDATED",
+                    List.of(new TranslationRequestPayload.RequestEntry(
+                            "MENU",
+                            foodId,
+                            food.getName(),
+                            food.getDescription()
+                    ))
+            );
         }
 
         return FoodResponse.of(food, locale);

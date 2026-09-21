@@ -266,6 +266,38 @@ services:
       start_period: 50s
 
   # ========================
+  # Translation Service
+  # ========================
+  translation-service:
+    build:
+      <<: *backend-build
+      args:
+        SERVICE_PATH: backend/translation-service
+    image: rtc-translation-service:dev
+    container_name: rtc-translation-service
+    restart: unless-stopped
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      TZ: Asia/Seoul
+    networks:
+      - rtcdelivery-network
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8085/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 12
+      start_period: 50s
+
+  # ========================
   # Frontend (Nuxt 4)
   # ========================
   nuxt-app:

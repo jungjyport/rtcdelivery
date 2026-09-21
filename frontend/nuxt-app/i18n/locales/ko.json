@@ -133,7 +133,16 @@
     "NETWORK_ERROR": "네트워크 연결을 확인해 주세요.",
     "REQUEST_TIMEOUT": "요청 시간이 초과되었습니다.",
     "INVALID_RESPONSE": "서버 응답을 처리할 수 없습니다.",
-    "UNKNOWN_ERROR": "알 수 없는 오류가 발생했습니다."
+    "UNKNOWN_ERROR": "알 수 없는 오류가 발생했습니다.",
+    "TRANSLATION_QUOTA_EXCEEDED": "번역 요청이 많아 잠시 후 다시 시도해 주세요.",
+    "TRANSLATION_UNAVAILABLE": "번역 서비스를 사용할 수 없습니다.",
+    "TRANSLATION_TEXT_TOO_LONG": "번역할 수 있는 길이를 초과했습니다.",
+    "UNSUPPORTED_TARGET_LOCALE": "지원하지 않는 언어입니다."
+  },
+  "translation": {
+    "showTranslation": "번역 보기",
+    "showOriginal": "원문 보기",
+    "aiTranslated": "AI 번역"
   },
   "auth": {
     "loginTitle": "로그인",
