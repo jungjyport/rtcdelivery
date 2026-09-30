@@ -75,16 +75,21 @@
 ---
 
 ### Phase 7: Order Service (주문) ⚪ (Planned)
+> 스펙: [order-spec.md](./sdd-spec-docs/feature/order-service/order-spec.md)
+
 - [ ] Order 및 OrderItem 엔티티 설계
-- [ ] 주문 생성 및 주문 상태 관리 (`PENDING`, `ACCEPTED`, `PREPARING`, `DELIVERING`, `DELIVERED`, `CANCELLED`)
-- [ ] 주문 상태 변경 시 이벤트 발생
+- [ ] 주문 생성 및 이행 상태 (`PENDING` → `ACCEPTED` → `PREPARING` → `READY` → `DELIVERING` → `DELIVERED` / `CANCELLED`)
+- [ ] 점주·운영자 HTTP 상태 전이. WebSocket/SSE 없음
+- [ ] 주문 생성·취소·환불 요청 이벤트 (`order-events`)
 
 ---
 
 ### Phase 8: Payment Service (결제) ⚪ (Planned)
+> 스펙: [payment-spec.md](./sdd-spec-docs/feature/payment-service/payment-spec.md)
+
 - [ ] Payment 엔티티 및 결제 상태 관리
-- [ ] 결제 승인/취소 API 가상 Mock 연동
-- [ ] 주문 연동 결제 처리 파이프라인
+- [ ] 결제 승인/환불 Mock PG
+- [ ] `order-events` 소비, `payment-events` 발행 (Choreography Saga)
 
 ---
 
@@ -119,9 +124,9 @@
 
 ---
 
-### Phase 13: Real-time Communication (WebSocket/SSE) ⚪ (Planned)
-- [ ] Spring WebSocket (STOMP) 메세징 브로커 설정
-- [ ] 라이더/손님 간 실시간 위치 및 주문 상태 변동 알림
+### Phase 13: 실시간 채널 ⚪ (하지 않음)
+주문 상태 푸시(WebSocket/SSE)와 라이더 위치는 이번 범위에 넣지 않습니다.
+상태 변경은 Phase 7의 HTTP 전이와 고객 조회로 대체합니다.
 
 ---
 

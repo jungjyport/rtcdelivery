@@ -320,5 +320,40 @@ JaCoCo 기준 **라인 80.6% / 브랜치 73.8%** (총 69개). `gradle check`에 
 | 번역 요청 이벤트 발행 | §5.3의 번역 폐기 지점에 Outbox INSERT 추가 |
 | `translation-results` 소비 | Inbox 멱등성 + `putTranslation` 호출 |
 | Redis 캐싱 | 조회 경로 |
+| 주문 스냅샷 내부 API | [§10](#10-주문-스냅샷-내부-api). order-service 주문 생성 전에 필요 |
 
 진행 상태는 [tasks.md](../../../tasks.md)를 따릅니다.
+
+---
+
+## 10. 주문 스냅샷 내부 API
+
+> 주문 생성 스펙: [order-spec.md §4](../order-service/order-spec.md#4-카탈로그-스냅샷)
+
+공개 상세(`GET /api/v1/restaurants/{id}`)에는 `ownerId`가 없고, 비활성 가게는 404입니다.
+주문 서비스는 접수 권한을 위해 점주 ID가 필요하고, 품절·영업 종료를 가격과 함께 한 번에 읽어야 합니다.
+
+| 항목 | 값 |
+|---|---|
+| Method / Path | `GET /internal/restaurants/{restaurantId}/order-snapshot` |
+| 노출 | **Gateway 라우트에 넣지 않는다.** order-service가 Eureka로 food-catalog에 직접 호출한다 |
+| 인가 | `permitAll`. 사용자 헤더가 없다. 8081을 외부에 열지 않는 기존 신뢰 경계(§4.1)와 같다 |
+| 이름 언어 | 원본 `ko`만. 번역명을 내리지 않는다 |
+
+없는 ID는 404 `RESTAURANT_NOT_FOUND`. 비활성 가게는 200이고 `active: false`입니다.
+
+```json
+{
+  "restaurantId": 1,
+  "ownerId": 10,
+  "active": true,
+  "name": "서울 김치찌개",
+  "deliveryFee": 3000,
+  "minOrderAmount": 12000,
+  "foods": [
+    { "foodId": 10, "name": "김치찌개", "price": 9000, "soldOut": false }
+  ]
+}
+```
+
+응답은 `ApiResponse`로 감쌉니다. 위 JSON은 `data` 안입니다.

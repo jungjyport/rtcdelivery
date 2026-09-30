@@ -8,7 +8,7 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 
 ### 핵심 목표
 
-- 실시간 주문/배달 추적
+- 주문·배달 상태 추적 — 점주·운영자가 HTTP로 바꾸고, 고객은 주문을 다시 조회한다
 - 다국어(ko, ja) 지원 — 정적 UI + 동적 콘텐츠 번역
 - 확장 가능한 마이크로서비스 구조
 - 이벤트 기반 비동기 처리
@@ -78,7 +78,7 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 | **api-gateway** | 8080 | Spring Cloud Gateway — API 라우팅, 인증 필터, CORS, Rate Limiting | 스캐폴딩 완료 |
 | **food-catalog-service** | 8081 | 음식점/메뉴/카테고리 관리 (CRUD), 검색 | 스캐폴딩 완료 |
 | **member-auth-service** | 8082 | 회원가입/로그인, JWT 발급, 회원 정보 관리 | 스캐폴딩 완료 |
-| **order-service** | 8083 | 주문 생성/관리, 배달 상태 추적, 실시간 알림 | 스캐폴딩 완료 |
+| **order-service** | 8083 | 주문 생성/관리, 배달 상태 전이 (HTTP) | 스캐폴딩 완료 |
 | **payment-service** | 8084 | 결제 처리, 결제 내역 관리, 환불 | 스캐폴딩 완료 |
 | **translation-service** | 8085 | Gemini 기반 콘텐츠 번역, 번역 이력·사전 관리 | 스캐폴딩 착수 |
 
@@ -138,7 +138,7 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 
 다음 경우에 사용합니다:
 
-- 주문 상태 변경 이벤트 (Order Service → Kafka → Payment Service, Notification)
+- 주문 생성·취소·환불 요청 이벤트 (Order Service → Kafka → Payment Service)
 - 음식점/메뉴 등록 시 번역 요청 (Food Catalog Service → Kafka → Translation Service)
 - 결제 완료 이벤트 (Payment Service → Kafka → Order Service)
 - 사용자 활동 로그/분석
@@ -147,8 +147,8 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 
 | 토픽 | Producer | Consumer | 설명 |
 |---|---|---|---|
-| `order-events` | order-service | payment-service | 주문 생성/변경 이벤트 |
-| `payment-events` | payment-service | order-service | 결제 결과 이벤트 |
+| `order-events` | order-service | payment-service | 주문 생성·취소·환불 요청 |
+| `payment-events` | payment-service | order-service | 결제·환불 결과 |
 | `translation-requests` | food-catalog-service | translation-service | 번역 요청 |
 | `translation-results` | translation-service | food-catalog-service | 번역 결과 |
 
@@ -161,7 +161,7 @@ RTC Delivery는 **Real Time Commerce** 방식의 다국적 음식 주문 및 딜
 | api-gateway | Rate Limiting, JWT 블랙리스트 |
 | food-catalog-service | 메뉴/음식점 캐싱 |
 | member-auth-service | Refresh Token 저장, 세션 관리 |
-| order-service | 실시간 주문 상태 캐싱 |
+| order-service | 이번 주문 범위에서는 쓰지 않는다. 상태 원본은 `rtc_order` |
 | translation-service | AI 쿼터 카운터(RPM/RPD), UGC 사용자별 일일 상한 |
 
 > translation-service는 **번역 결과를 Redis에 캐싱하지 않습니다.** 재사용 lookup은 `translation_history`(원문 해시 단위)와
@@ -260,11 +260,13 @@ docker compose -f docker-compose-dev.yml up redis kafka zookeeper
 
 ---
 
-## 10. 실시간 통신 (Planned)
+## 10. 주문 상태 반영
 
-주문 상태 실시간 추적을 위해 다음을 계획합니다:
+WebSocket과 SSE는 쓰지 않습니다. 주문 상태의 원본은 order-service DB이고, 변경은 점주·운영자 화면의 HTTP 요청입니다.
 
-- **WebSocket** (STOMP over WebSocket) — Order Service에서 클라이언트로 주문 상태 푸시
-- 또는 **SSE (Server-Sent Events)** — 단방향 실시간 업데이트
+- 점주·운영자: `PATCH /api/v1/orders/{id}/status` (접수 → 조리 → 배달 완료)
+- 고객: `GET /api/v1/orders/{id}`를 화면 진입과 새로고침으로 조회
+- 서비스 사이 결제 결과만 Kafka (`order-events`, `payment-events`)
 
-> Order Service의 `build.gradle`에 `spring-boot-starter-websocket`이 이미 포함되어 있습니다.
+설계는 [order-spec.md](./sdd-spec-docs/feature/order-service/order-spec.md)를 따릅니다.
+스캐폴딩의 `spring-boot-starter-websocket`과 `/ws/**` 허용은 구현 시 제거합니다.

@@ -4,10 +4,10 @@
 
 **[development-roadmap.md](./development-roadmap.md)와의 역할 분담**
 
-| 문서 | 다루는 것 |
-|---|---|
-| `development-roadmap.md` | **언제** — Phase 단위의 순서와 의존 관계 |
-| `tasks.md` (이 문서) | **무엇을** — 서비스별 기능 단위 체크리스트와 스펙 링크 |
+| 문서                     | 다루는 것                                              |
+| ------------------------ | ------------------------------------------------------ |
+| `development-roadmap.md` | **언제** — Phase 단위의 순서와 의존 관계               |
+| `tasks.md` (이 문서)     | **무엇을** — 서비스별 기능 단위 체크리스트와 스펙 링크 |
 
 같은 작업이 양쪽에 나타날 수 있습니다. 진행 상태의 진실의 원천은 **이 문서**이며, 로드맵은 Phase 전체의 완료 여부만 갱신합니다.
 
@@ -94,12 +94,15 @@
   - [x] 음식점 상세 · 메뉴 목록
   - [x] 검색
 - [ ] **장바구니** — Pinia 스토어 + Drawer UI
+  - 스펙: [order-pages-spec.md §2](./sdd-spec-docs/feature/nuxt-app/order-pages-spec.md#2-장바구니)
 - [ ] **주문 · 결제 화면**
+  - 스펙: [order-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/order-pages-spec.md)
+  - API 계약: [order-spec.md](./sdd-spec-docs/feature/order-service/order-spec.md) · [payment-spec.md](./sdd-spec-docs/feature/payment-service/payment-spec.md)
   - [ ] 주문서 작성
   - [ ] 결제 진행
   - [ ] 주문 내역 / 주문 상세
-- [ ] **주문 실시간 추적** — WebSocket 또는 SSE 구독
-  - _(스펙 미작성)_
+- [ ] **주문 상태 변경 (점주 · 운영자)** — 운영 화면 버튼으로 HTTP 전이. WebSocket/SSE 없음
+  - 스펙: [order-pages-spec.md §7](./sdd-spec-docs/feature/nuxt-app/order-pages-spec.md#7-점주-운영-화면) · [order-spec.md §6.3](./sdd-spec-docs/feature/order-service/order-spec.md#63-상태-변경--patch-apiv1ordersidstatus)
 
 ---
 
@@ -189,28 +192,33 @@
   - [x] `translation-results` 소비 + Inbox 멱등성 → 번역 테이블 upsert
     - 스펙: [translation-pipeline-spec.md §6.2](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)
 - [x] **개발용 시드 데이터** — `ddl-auto` + `data.sql` (카테고리 12 · 음식점 4 · 메뉴 10 · 일본어 번역 일부)
-- [ ] **Redis 캐싱** — 메뉴/음식점 조회 캐시
 - [x] **단위 테스트 70% 이상** — JaCoCo 기준 라인 80.6% / 브랜치 73.8% (`gradle check`에 70% 게이트 연결)
+- [ ] **주문 스냅샷 내부 API** — `GET /internal/restaurants/{id}/order-snapshot` (Gateway에 올리지 않음)
+  - 스펙: [catalog-spec.md §10](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md#10-주문-스냅샷-내부-api) · [order-spec.md §4](./sdd-spec-docs/feature/order-service/order-spec.md#4-카탈로그-스냅샷)
 
 ---
 
 ## 4. order-service
 
 > 계약 방식: **Swagger (Code-first)**
+> 설계 스펙: [order-spec.md](./sdd-spec-docs/feature/order-service/order-spec.md)
 
 - [x] **스캐폴딩**
 - [x] **에러 처리 정비** — `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`, `ApiResponse`의 `@JsonInclude` 제거
   - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
-- [ ] **Order / OrderItem 도메인** — 엔티티 설계
-- [ ] **주문 생성** — `POST /api/v1/orders`
-- [ ] **주문 조회** — 내 주문 목록 / 주문 상세
+- [ ] **Order / OrderItem 도메인** — 엔티티, 이행 상태·결제 상태 분리
+  - 스펙: [order-spec.md §3·§5](./sdd-spec-docs/feature/order-service/order-spec.md#3-상태-모델)
+- [ ] **주문 생성** — `POST /api/v1/orders`, 카탈로그 스냅샷, `Idempotency-Key`
+  - 스펙: [order-spec.md §4·§6.1](./sdd-spec-docs/feature/order-service/order-spec.md#41-호출)
+- [ ] **주문 조회** — 내 주문 목록 / 주문 상세 / 운영 목록 `GET /api/v1/orders/managed`
 - [ ] **주문 상태 관리** — `PENDING` → `ACCEPTED` → `PREPARING` → `READY` → `DELIVERING` → `DELIVERED` / `CANCELLED`
+  - 점주·운영자 `PATCH /api/v1/orders/{id}/status`. 푸시(WebSocket/SSE) 없음
+  - 스펙: [order-spec.md §3·§6.3](./sdd-spec-docs/feature/order-service/order-spec.md#63-상태-변경--patch-apiv1ordersidstatus)
+- [ ] **취소 · 환불 요청** — `POST /cancel`, 운영자 `POST /refund`
 - [ ] **Transactional Outbox** — `outbox_event` 테이블 + Polling Publisher
-  - 스펙: [AGENTS.md §4.1](./AGENTS.md)
-- [ ] **Kafka 이벤트 발행** — `order-events`
+  - 스펙: [order-spec.md §5.3](./sdd-spec-docs/feature/order-service/order-spec.md#53-outbox_event--inbox_event) · [AGENTS.md §4.1](./AGENTS.md)
+- [ ] **Kafka 이벤트 발행** — `order-events` (`ORDER_CREATED`, `ORDER_CANCELLED`, `ORDER_REFUND_REQUESTED`)
 - [ ] **결제 결과 소비** — `payment-events` Consumer + Inbox 멱등성
-- [ ] **실시간 알림** — WebSocket(STOMP) 또는 SSE
-  - _(스펙 미작성)_
 - [ ] **단위 테스트 70% 이상**
 
 ---
@@ -218,16 +226,19 @@
 ## 5. payment-service
 
 > 계약 방식: **Swagger (Code-first)**
+> 설계 스펙: [payment-spec.md](./sdd-spec-docs/feature/payment-service/payment-spec.md)
 
 - [x] **스캐폴딩**
 - [x] **에러 처리 정비** — `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`, `ApiResponse`의 `@JsonInclude` 제거
   - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
-- [ ] **Payment 도메인** — 엔티티 + 결제 상태 관리
-- [ ] **결제 승인 / 취소** — Mock PG 연동
-- [ ] **환불**
+- [ ] **Payment 도메인** — 주문당 결제 1건, 상태 `AWAITING` → `COMPLETED` / `FAILED` / `REFUNDED`
+  - 스펙: [payment-spec.md §3·§4](./sdd-spec-docs/feature/payment-service/payment-spec.md#3-상태)
+- [ ] **결제 승인** — `POST /api/v1/payments/{id}/approve`, Mock PG (끝자리 `0000` 거절)
+- [ ] **환불** — `ORDER_CANCELLED` / `ORDER_REFUND_REQUESTED` 소비 후 전액 환불
 - [ ] **주문 이벤트 소비** — `order-events` Consumer + Inbox 멱등성
 - [ ] **결제 결과 발행** — `payment-events` (Outbox 경유)
-- [ ] **Saga 보상 트랜잭션** — 결제 실패 시 주문 취소 연동
+- [ ] **Saga** — 승인 전 취소는 결제 종료, 승인 후 취소는 환불, 취소 뒤 늦게 도착한 승인 완료도 환불
+  - 스펙: [order-spec.md §7.4](./sdd-spec-docs/feature/order-service/order-spec.md#74-payment-events-소비) · [payment-spec.md §5](./sdd-spec-docs/feature/payment-service/payment-spec.md#5-이벤트)
 - [ ] **단위 테스트 70% 이상**
 
 ---
@@ -273,9 +284,9 @@
 ---
 
 ## 8. translation-service
- 
+
 > 계약 방식: **Swagger (Code-first)**
- 
+
 - [x] **서비스 스캐폴딩** — `backend/translation-service/` (포트 8085, DB `rtc_translation`)
   - 스펙: [translation-pipeline-spec.md §1](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)
 - [x] **번역 요청 소비** — `translation-requests` Consumer + Inbox + `translation_job` 적재
@@ -310,22 +321,22 @@
 
 착수 전에 읽어야 할 문서를 서비스별로 정리한 표입니다. AGENTS.md §2.1의 계약 방식 판별 결과를 반영합니다.
 
-| 대상 | 계약 방식 | 스펙 문서 |
-|---|---|---|
-| frontend / nuxt-app | 문서 기반 | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) · [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) · [layout-spec.md](./sdd-spec-docs/feature/nuxt-app/layout-spec.md) · [catalog-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/catalog-pages-spec.md) · [owner-store-spec.md](./sdd-spec-docs/feature/nuxt-app/owner-store-spec.md) · [admin-role-spec.md](./sdd-spec-docs/feature/nuxt-app/admin-role-spec.md) |
-| member-auth-service | Swagger (Code-first) | 어노테이션 + [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) · [role-management-spec.md](./sdd-spec-docs/feature/member-auth-service/role-management-spec.md) |
-| food-catalog-service | Swagger (Code-first) | 어노테이션 + [catalog-spec.md](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md) · [translation-system.md](./translation-system.md) |
-| order-service | Swagger (Code-first) | 어노테이션 |
-| payment-service | Swagger (Code-first) | 어노테이션 |
-| api-gateway | — | [gateway-auth-spec.md](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md) |
-| translation-service | Swagger (Code-first) | 어노테이션 + [translation-pipeline-spec.md](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md) · [gemini-provider-spec.md](./sdd-spec-docs/feature/translation-service/gemini-provider-spec.md) · [ugc-translation-spec.md](./sdd-spec-docs/feature/translation-service/ugc-translation-spec.md) · 개요 [translation-system.md](./translation-system.md) |
+| 대상                 | 계약 방식            | 스펙 문서                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| frontend / nuxt-app  | 문서 기반            | [api-client-spec.md](./sdd-spec-docs/feature/nuxt-app/api-client-spec.md) · [auth-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/auth-pages-spec.md) · [layout-spec.md](./sdd-spec-docs/feature/nuxt-app/layout-spec.md) · [catalog-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/catalog-pages-spec.md) · [owner-store-spec.md](./sdd-spec-docs/feature/nuxt-app/owner-store-spec.md) · [admin-role-spec.md](./sdd-spec-docs/feature/nuxt-app/admin-role-spec.md) · [order-pages-spec.md](./sdd-spec-docs/feature/nuxt-app/order-pages-spec.md) |
+| member-auth-service  | Swagger (Code-first) | 어노테이션 + [auth-jwt-spec.md](./sdd-spec-docs/feature/member-auth-service/auth-jwt-spec.md) · [role-management-spec.md](./sdd-spec-docs/feature/member-auth-service/role-management-spec.md)                                                                                                                                                                                                                                                                        |
+| food-catalog-service | Swagger (Code-first) | 어노테이션 + [catalog-spec.md](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md) · [translation-system.md](./translation-system.md)                                                                                                                                                                                                                                                                                                                       |
+| order-service        | Swagger (Code-first) | 어노테이션 + [order-spec.md](./sdd-spec-docs/feature/order-service/order-spec.md)                                                                                                                                                                                                                                                                                                                                                                                     |
+| payment-service      | Swagger (Code-first) | 어노테이션 + [payment-spec.md](./sdd-spec-docs/feature/payment-service/payment-spec.md)                                                                                                                                                                                                                                                                                                                                                                               |
+| api-gateway          | —                    | [gateway-auth-spec.md](./sdd-spec-docs/feature/api-gateway/gateway-auth-spec.md)                                                                                                                                                                                                                                                                                                                                                                                      |
+| translation-service  | Swagger (Code-first) | 어노테이션 + [translation-pipeline-spec.md](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md) · [gemini-provider-spec.md](./sdd-spec-docs/feature/translation-service/gemini-provider-spec.md) · [ugc-translation-spec.md](./sdd-spec-docs/feature/translation-service/ugc-translation-spec.md) · 개요 [translation-system.md](./translation-system.md)                                                                                       |
 
 **전 서비스 공통**
 
-| 문서 | 다루는 것 |
-|---|---|
-| [api-conventions.md](./api-conventions.md) | URI 명명, 응답 래퍼, 페이지네이션, 인증 헤더 |
-| [error-handling.md](./error-handling.md) | 에러 응답 구현 방법, 예외 매핑, 에러 코드 카탈로그 |
+| 문서                                       | 다루는 것                                          |
+| ------------------------------------------ | -------------------------------------------------- |
+| [api-conventions.md](./api-conventions.md) | URI 명명, 응답 래퍼, 페이지네이션, 인증 헤더       |
+| [error-handling.md](./error-handling.md)   | 에러 응답 구현 방법, 예외 매핑, 에러 코드 카탈로그 |
 
 > 새 스펙 문서는 `docs/sdd-spec-docs/feature/{service-name}/`에 두고, 이 표와 해당 태스크에 링크를 추가합니다.
 
@@ -335,17 +346,17 @@
 
 `auth-jwt-spec.md §10` · `gateway-auth-spec.md §10`의 구현 순서를 요약한 것입니다.
 
-| 순서 | 작업 | 대상 | 상태 |
-|---|---|---|---|
-| 1 | 에러 처리 정비 (`ErrorCode` / `BusinessException` / `GlobalExceptionHandler`) | MVC 4개 서비스 | 완료 |
-| 2 | `GatewayErrorWebExceptionHandler` | api-gateway | 완료 |
-| 2-1 | CORS 일원화 (`SecurityConfig`로 이전, `globalcors` 제거) | api-gateway | 완료 |
-| 3 | `BaseTimeEntity` + `Member` 도메인 | member-auth-service | 완료 |
-| 4 | RSA 키 생성 + `JwtProvider` | member-auth-service | 완료 |
-| 5 | 회원가입 → 로그인 (AT 발급 + RT 쿠키) | member-auth-service | 완료 |
-| 6 | `RefreshTokenService` (RTR) + `/refresh-token` + `/logout` | member-auth-service | 완료 |
-| 7 | `JwtValidator` + `JwtVerificationFilter` | api-gateway | 완료 |
-| 8 | `HeaderAuthenticationFilter` + `/auth/me` + Security 잠금 | member-auth-service | 완료 |
-| 9 | 로그인 · 회원가입 화면 | nuxt-app | 완료 |
+| 순서 | 작업                                                                          | 대상                | 상태 |
+| ---- | ----------------------------------------------------------------------------- | ------------------- | ---- |
+| 1    | 에러 처리 정비 (`ErrorCode` / `BusinessException` / `GlobalExceptionHandler`) | MVC 4개 서비스      | 완료 |
+| 2    | `GatewayErrorWebExceptionHandler`                                             | api-gateway         | 완료 |
+| 2-1  | CORS 일원화 (`SecurityConfig`로 이전, `globalcors` 제거)                      | api-gateway         | 완료 |
+| 3    | `BaseTimeEntity` + `Member` 도메인                                            | member-auth-service | 완료 |
+| 4    | RSA 키 생성 + `JwtProvider`                                                   | member-auth-service | 완료 |
+| 5    | 회원가입 → 로그인 (AT 발급 + RT 쿠키)                                         | member-auth-service | 완료 |
+| 6    | `RefreshTokenService` (RTR) + `/refresh-token` + `/logout`                    | member-auth-service | 완료 |
+| 7    | `JwtValidator` + `JwtVerificationFilter`                                      | api-gateway         | 완료 |
+| 8    | `HeaderAuthenticationFilter` + `/auth/me` + Security 잠금                     | member-auth-service | 완료 |
+| 9    | 로그인 · 회원가입 화면                                                        | nuxt-app            | 완료 |
 
 7과 8은 한 묶음입니다. Gateway가 헤더를 주입하기 전에는 `/auth/me`가 401만 반환하기 때문입니다.
