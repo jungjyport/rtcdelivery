@@ -28,6 +28,7 @@
    - [4.2 관리자 관제 콘솔: 실시간 잡 모니터링 & 수동/일괄 재시도 파이프라인](#42-관리자-관제-콘솔-실시간-잡-모니터링--수동일괄-재시도-파이프라인)
    - [4.3 엔터프라이즈 보안: RSA 비대칭키 JWT & Gateway 헤더 스푸핑 방어](#43-엔터프라이즈-보안-rsa-비대칭키-jwt--gateway-헤더-스푸핑-방어)
    - [4.4 모던 프론트엔드: Nuxt 4 SSR, i18n 동적 전환, 동시성 토큰 갱신 큐](#44-모던-프론트엔드-nuxt-4-ssr-i18n-동적-전환-동시성-토큰-갱신-큐)
+   - [4.5 주문·결제 수명주기: 멱등성 키, 카탈로그 스냅샷 & 비동기 사가(Choreography Saga)](#45-주문결제-수명주기-멱등성-키-카탈로그-스냅샷--비동기-사가choreography-saga)
 5. [기술 스택](#5-기술-스택)
 6. [프로젝트 구조](#6-프로젝트-구조)
 7. [로컬 실행 방법](#7-로컬-실행-방법)
@@ -277,6 +278,23 @@ Incoming Items (식당명, 설명, 각 메뉴명, 메뉴 설명)
 - **동시성 401 토큰 갱신 큐 (`api-client.ts`)**:
   - 다수의 비동기 API가 동시에 401(토큰 만료)을 수신했을 때 무분별하게 갱신 API를 중복 호출하지 않도록 **단일 Refresh Promise 락 및 대기 큐(Request Queue)** 패턴을 적용해 토큰 갱신 안정성 보장.
 
+### 4.5 주문·결제 수명주기: 멱등성 키, 카탈로그 스냅샷 & 비동기 사가(Choreography Saga)
+번역 파이프라인과 동일한 Outbox/Inbox 신뢰성 기반 위에서, **주문(Order)과 결제(Payment) 도메인 특유의 정합성 문제**를 해결하기 위한 차별화된 아키텍처를 적용했습니다.
+
+- **클라이언트 멱등성 키 (`Idempotency-Key` 헤더)**:
+  - 모바일·웹 결제의 불안정한 네트워크 환경에서 발생할 수 있는 주문 중복 요청을 원천 차단하기 위해 클라이언트가 생성한 UUID 기반 `Idempotency-Key`를 헤더로 필수 검증합니다.
+  - DB `UK(member_id, idempotency_key)` 제약을 활용하여 **신규 주문은 `201 Created`**, **동일 키의 네트워크 재전송은 기존 생성된 주문을 `200 OK`로 멱등하게 반환**합니다.
+- **카탈로그 스냅샷 격리 & Resilience4j 보호**:
+  - 주문 생성 시 `order-service`는 게이트웨이를 통하지 않는 내부 전용 API(`GET /internal/restaurants/{id}/order-snapshot`)를 통해 식당 영업 상태, 최소주문금액, 메뉴 가격 및 품절 여부를 검증하고 그 시점의 데이터로 스냅샷을 구성합니다.
+  - 서비스 간 통신 장애 전파를 방지하기 위해 `Resilience4j` (`@CircuitBreaker`, `@Retry`)를 적용했습니다.
+  - 주문 당시의 가격과 정보가 `order_item` 테이블에 영속화되므로, **이후 점주가 메뉴 가격을 수정하거나 메뉴를 삭제하더라도 기존 주문의 정산 및 환불 금액 왜곡이 발생하지 않습니다.**
+- **이행(Fulfillment)과 결제(Payment) 상태 모델의 엄격한 분리**:
+  - 매장 조리 및 배달 상태(`PENDING ➔ ACCEPTED ➔ PREPARING ➔ READY ➔ DELIVERING ➔ DELIVERED / CANCELLED`)와 결제 수명주기(`UNPAID / PAID / REFUND_PENDING / REFUNDED`)를 독립된 상태 머신으로 분리 관리합니다.
+- **비동기 사가(Choreography Saga) 기반 결제 및 보상 트랜잭션**:
+  - 주문 생성 시 `ORDER_CREATED` 이벤트를 발행하면 `payment-service`가 이를 소비해 `AWAITING(대기)` 상태의 결제 레코드를 생성합니다.
+  - 클라이언트가 결제 승인을 요청하면 Mock PG(카드 끝자리 `0000` 입력 시 고의 거절 시뮬레이션 지원)를 거쳐 승인 성공 시 `PAYMENT_COMPLETED`, 실패 시 `PAYMENT_FAILED` 이벤트를 발행해 주문 상태를 갱신합니다.
+  - **보상 트랜잭션**: 결제 전 주문 취소는 결제 레코드를 즉시 `CANCELLED` 처리하여 승인을 원천 차단하고, 결제 완료 후 주문 취소 또는 관리자 환불 요청은 PG사 전액 환불 호출 후 `PAYMENT_REFUNDED` 이벤트를 발행하여 주문 상태를 `REFUNDED`로 안전하게 동기화합니다.
+
 ---
 
 ## 5. 기술 스택
@@ -362,7 +380,9 @@ docker compose -f docker-compose-dev.yml up -d redis kafka zookeeper
 2. `api-gateway` (Port 8080)
 3. `member-auth-service` (Port 8082)
 4. `food-catalog-service` (Port 8081)
-5. `translation-service` (Port 8085)
+5. `order-service` (Port 8083)
+6. `payment-service` (Port 8084)
+7. `translation-service` (Port 8085)
 
 ### 5) 프론트엔드 Nuxt 앱 실행
 ```bash

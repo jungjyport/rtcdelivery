@@ -51,6 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
+                        .requestMatchers("/internal/**").permitAll()
                         // 카탈로그 조회는 비로그인 사용자에게도 열려 있다
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/categories/**",

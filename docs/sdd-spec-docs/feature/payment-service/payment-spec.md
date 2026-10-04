@@ -86,7 +86,7 @@ AWAITING → COMPLETED → REFUNDING → REFUNDED
 | `status` | VARCHAR(30) | NOT NULL | §3 |
 | `method` | VARCHAR(20) | NULL | 승인 시점. 현재 `CARD`만 |
 | `card_last4` | CHAR(4) | NULL | |
-| `pg_approval_code` | VARCHAR(40) | NULL | Mock이 만든 승인 번호 |
+| `pg_approval_code` | VARCHAR(50) | NULL | Mock이 만든 승인 번호 |
 
 `outbox_event` / `inbox_event`는 [order-spec.md §5.3](../order-service/order-spec.md#53-outbox_event--inbox_event)과 같다. Inbox consumer group은 `payment-service-group`.
 

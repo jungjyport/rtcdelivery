@@ -1,9 +1,11 @@
 package com.rtcdelivery.foodcatalog.service;
 
 import com.rtcdelivery.foodcatalog.domain.Category;
+import com.rtcdelivery.foodcatalog.domain.Food;
 import com.rtcdelivery.foodcatalog.domain.Restaurant;
 import com.rtcdelivery.foodcatalog.dto.request.RestaurantCreateRequest;
 import com.rtcdelivery.foodcatalog.dto.request.RestaurantUpdateRequest;
+import com.rtcdelivery.foodcatalog.dto.response.OrderSnapshotResponse;
 import com.rtcdelivery.foodcatalog.dto.response.PageResponse;
 import com.rtcdelivery.foodcatalog.dto.response.RestaurantDetailResponse;
 import com.rtcdelivery.foodcatalog.dto.response.RestaurantResponse;
@@ -256,5 +258,66 @@ class RestaurantServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.CATEGORY_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("getOrderSnapshot_존재하는_음식점과_메뉴_목록을_성공적으로_반환한다")
+    void getOrderSnapshot_success() {
+        Restaurant targetRestaurant = Restaurant.builder()
+                .id(1L)
+                .ownerId(OWNER_ID)
+                .category(category)
+                .name("서울 김치찌개")
+                .deliveryFee(3000)
+                .minOrderAmount(12000)
+                .isActive(true)
+                .build();
+
+        Food food = Food.builder()
+                .restaurant(targetRestaurant)
+                .name("김치찌개")
+                .price(9000)
+                .isSoldOut(false)
+                .build();
+
+        given(restaurantRepository.findById(1L)).willReturn(Optional.of(targetRestaurant));
+        given(foodRepository.findAllByRestaurantIdOrderByDisplayOrderAscIdAsc(1L)).willReturn(List.of(food));
+
+        OrderSnapshotResponse snapshot = restaurantService.getOrderSnapshot(1L);
+
+        assertThat(snapshot.restaurantId()).isEqualTo(1L);
+        assertThat(snapshot.ownerId()).isEqualTo(OWNER_ID);
+        assertThat(snapshot.active()).isTrue();
+        assertThat(snapshot.name()).isEqualTo("서울 김치찌개");
+        assertThat(snapshot.deliveryFee()).isEqualTo(3000);
+        assertThat(snapshot.minOrderAmount()).isEqualTo(12000);
+        assertThat(snapshot.foods()).hasSize(1);
+        assertThat(snapshot.foods().get(0).name()).isEqualTo("김치찌개");
+        assertThat(snapshot.foods().get(0).price()).isEqualTo(9000);
+        assertThat(snapshot.foods().get(0).soldOut()).isFalse();
+    }
+
+    @Test
+    @DisplayName("getOrderSnapshot_비활성_음식점이어도_조회_가능하며_active는_false다")
+    void getOrderSnapshot_inactiveRestaurant_returnsActiveFalse() {
+        restaurant.deactivate();
+        given(restaurantRepository.findById(1L)).willReturn(Optional.of(restaurant));
+        given(foodRepository.findAllByRestaurantIdOrderByDisplayOrderAscIdAsc(1L)).willReturn(List.of());
+
+        OrderSnapshotResponse snapshot = restaurantService.getOrderSnapshot(1L);
+
+        assertThat(snapshot.active()).isFalse();
+        assertThat(snapshot.foods()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("getOrderSnapshot_존재하지_않는_음식점이면_RESTAURANT_NOT_FOUND_예외가_발생한다")
+    void getOrderSnapshot_notFound_throwsException() {
+        given(restaurantRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> restaurantService.getOrderSnapshot(999L))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.RESTAURANT_NOT_FOUND);
     }
 }

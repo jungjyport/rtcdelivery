@@ -32,9 +32,17 @@ public enum ErrorCode {
     // ── 주문 ──────────────────────────────────────────────
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND),
     ORDER_ITEM_EMPTY(HttpStatus.BAD_REQUEST),
+    DUPLICATE_ORDER_ITEM(HttpStatus.BAD_REQUEST),
+    RESTAURANT_NOT_FOUND(HttpStatus.NOT_FOUND),
+    RESTAURANT_CLOSED(HttpStatus.CONFLICT),
+    FOOD_NOT_FOUND(HttpStatus.NOT_FOUND),
+    FOOD_UNAVAILABLE(HttpStatus.CONFLICT),
+    MIN_ORDER_AMOUNT_NOT_MET(HttpStatus.BAD_REQUEST),
+    ORDER_NOT_PAID(HttpStatus.CONFLICT),
     ORDER_ALREADY_CANCELLED(HttpStatus.CONFLICT),
     ORDER_NOT_CANCELLABLE(HttpStatus.CONFLICT),
     INVALID_ORDER_STATUS_TRANSITION(HttpStatus.CONFLICT),
+    REFUND_NOT_ALLOWED(HttpStatus.CONFLICT),
 
     /** 타 서비스(카탈로그·결제) 호출 실패. Circuit Breaker fallback에서 사용한다. */
     UPSTREAM_SERVICE_ERROR(HttpStatus.SERVICE_UNAVAILABLE);

@@ -32,6 +32,7 @@ public enum ErrorCode {
     // ── 결제 ──────────────────────────────────────────────
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND),
     PAYMENT_ALREADY_COMPLETED(HttpStatus.CONFLICT),
+    PAYMENT_NOT_APPROVABLE(HttpStatus.CONFLICT),
     PAYMENT_FAILED(HttpStatus.UNPROCESSABLE_ENTITY),
     PAYMENT_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST),
     REFUND_NOT_ALLOWED(HttpStatus.CONFLICT),

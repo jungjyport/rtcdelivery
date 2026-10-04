@@ -6,6 +6,7 @@ import com.rtcdelivery.foodcatalog.domain.Restaurant;
 import com.rtcdelivery.foodcatalog.dto.event.TranslationRequestPayload;
 import com.rtcdelivery.foodcatalog.dto.request.RestaurantCreateRequest;
 import com.rtcdelivery.foodcatalog.dto.request.RestaurantUpdateRequest;
+import com.rtcdelivery.foodcatalog.dto.response.OrderSnapshotResponse;
 import com.rtcdelivery.foodcatalog.dto.response.PageResponse;
 import com.rtcdelivery.foodcatalog.dto.response.RestaurantDetailResponse;
 import com.rtcdelivery.foodcatalog.dto.response.RestaurantResponse;
@@ -48,6 +49,18 @@ public class RestaurantService {
         Restaurant restaurant = findActiveById(restaurantId);
         List<Food> foods = foodRepository.findAllByRestaurantIdOrderByDisplayOrderAscIdAsc(restaurantId);
         return RestaurantDetailResponse.of(restaurant, foods, locale);
+    }
+
+    /**
+     * 주문 시점 카탈로그 스냅샷 조회 (내부 서비스 전용).
+     * 비활성 매장이어도 조회 가능하며 active=false로 반환한다.
+     */
+    @Transactional(readOnly = true)
+    public OrderSnapshotResponse getOrderSnapshot(Long restaurantId) {
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESTAURANT_NOT_FOUND));
+        List<Food> foods = foodRepository.findAllByRestaurantIdOrderByDisplayOrderAscIdAsc(restaurantId);
+        return OrderSnapshotResponse.of(restaurant, foods);
     }
 
     @Transactional

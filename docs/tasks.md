@@ -193,7 +193,7 @@
     - 스펙: [translation-pipeline-spec.md §6.2](./sdd-spec-docs/feature/translation-service/translation-pipeline-spec.md)
 - [x] **개발용 시드 데이터** — `ddl-auto` + `data.sql` (카테고리 12 · 음식점 4 · 메뉴 10 · 일본어 번역 일부)
 - [x] **단위 테스트 70% 이상** — JaCoCo 기준 라인 80.6% / 브랜치 73.8% (`gradle check`에 70% 게이트 연결)
-- [ ] **주문 스냅샷 내부 API** — `GET /internal/restaurants/{id}/order-snapshot` (Gateway에 올리지 않음)
+- [x] **주문 스냅샷 내부 API** — `GET /internal/restaurants/{id}/order-snapshot` (Gateway에 올리지 않음)
   - 스펙: [catalog-spec.md §10](./sdd-spec-docs/feature/food-catalog-service/catalog-spec.md#10-주문-스냅샷-내부-api) · [order-spec.md §4](./sdd-spec-docs/feature/order-service/order-spec.md#4-카탈로그-스냅샷)
 
 ---
@@ -206,20 +206,20 @@
 - [x] **스캐폴딩**
 - [x] **에러 처리 정비** — `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`, `ApiResponse`의 `@JsonInclude` 제거
   - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
-- [ ] **Order / OrderItem 도메인** — 엔티티, 이행 상태·결제 상태 분리
+- [x] **Order / OrderItem 도메인** — 엔티티, 이행 상태·결제 상태 분리
   - 스펙: [order-spec.md §3·§5](./sdd-spec-docs/feature/order-service/order-spec.md#3-상태-모델)
-- [ ] **주문 생성** — `POST /api/v1/orders`, 카탈로그 스냅샷, `Idempotency-Key`
+- [x] **주문 생성** — `POST /api/v1/orders`, 카탈로그 스냅샷, `Idempotency-Key`
   - 스펙: [order-spec.md §4·§6.1](./sdd-spec-docs/feature/order-service/order-spec.md#41-호출)
-- [ ] **주문 조회** — 내 주문 목록 / 주문 상세 / 운영 목록 `GET /api/v1/orders/managed`
-- [ ] **주문 상태 관리** — `PENDING` → `ACCEPTED` → `PREPARING` → `READY` → `DELIVERING` → `DELIVERED` / `CANCELLED`
+- [x] **주문 조회** — 내 주문 목록 / 주문 상세 / 운영 목록 `GET /api/v1/orders/managed`
+- [x] **주문 상태 관리** — `PENDING` → `ACCEPTED` → `PREPARING` → `READY` → `DELIVERING` → `DELIVERED` / `CANCELLED`
   - 점주·운영자 `PATCH /api/v1/orders/{id}/status`. 푸시(WebSocket/SSE) 없음
   - 스펙: [order-spec.md §3·§6.3](./sdd-spec-docs/feature/order-service/order-spec.md#63-상태-변경--patch-apiv1ordersidstatus)
-- [ ] **취소 · 환불 요청** — `POST /cancel`, 운영자 `POST /refund`
-- [ ] **Transactional Outbox** — `outbox_event` 테이블 + Polling Publisher
+- [x] **취소 · 환불 요청** — `POST /cancel`, 운영자 `POST /refund`
+- [x] **Transactional Outbox** — `outbox_event` 테이블 + Polling Publisher
   - 스펙: [order-spec.md §5.3](./sdd-spec-docs/feature/order-service/order-spec.md#53-outbox_event--inbox_event) · [AGENTS.md §4.1](./AGENTS.md)
-- [ ] **Kafka 이벤트 발행** — `order-events` (`ORDER_CREATED`, `ORDER_CANCELLED`, `ORDER_REFUND_REQUESTED`)
-- [ ] **결제 결과 소비** — `payment-events` Consumer + Inbox 멱등성
-- [ ] **단위 테스트 70% 이상**
+- [x] **Kafka 이벤트 발행** — `order-events` (`ORDER_CREATED`, `ORDER_CANCELLED`, `ORDER_REFUND_REQUESTED`)
+- [x] **결제 결과 소비** — `payment-events` Consumer + Inbox 멱등성
+- [x] **단위 테스트 70% 이상**
 
 ---
 
@@ -231,15 +231,15 @@
 - [x] **스캐폴딩**
 - [x] **에러 처리 정비** — `ErrorCode`, `BusinessException`, `GlobalExceptionHandler`, `ApiResponse`의 `@JsonInclude` 제거
   - 스펙: [error-handling.md §4](./error-handling.md#4-mvc-서비스-구현-member-auth--food-catalog--order--payment)
-- [ ] **Payment 도메인** — 주문당 결제 1건, 상태 `AWAITING` → `COMPLETED` / `FAILED` / `REFUNDED`
+- [x] **Payment 도메인** — 주문당 결제 1건, 상태 `AWAITING` → `COMPLETED` / `FAILED` / `REFUNDED`
   - 스펙: [payment-spec.md §3·§4](./sdd-spec-docs/feature/payment-service/payment-spec.md#3-상태)
-- [ ] **결제 승인** — `POST /api/v1/payments/{id}/approve`, Mock PG (끝자리 `0000` 거절)
-- [ ] **환불** — `ORDER_CANCELLED` / `ORDER_REFUND_REQUESTED` 소비 후 전액 환불
-- [ ] **주문 이벤트 소비** — `order-events` Consumer + Inbox 멱등성
-- [ ] **결제 결과 발행** — `payment-events` (Outbox 경유)
-- [ ] **Saga** — 승인 전 취소는 결제 종료, 승인 후 취소는 환불, 취소 뒤 늦게 도착한 승인 완료도 환불
+- [x] **결제 승인** — `POST /api/v1/payments/{id}/approve`, Mock PG (끝자리 `0000` 거절)
+- [x] **환불** — `ORDER_CANCELLED` / `ORDER_REFUND_REQUESTED` 소비 후 전액 환불
+- [x] **주문 이벤트 소비** — `order-events` Consumer + Inbox 멱등성
+- [x] **결제 결과 발행** — `payment-events` (Outbox 경유)
+- [x] **Saga** — 승인 전 취소는 결제 종료, 승인 후 취소는 환불, 취소 뒤 늦게 도착한 승인 완료도 환불
   - 스펙: [order-spec.md §7.4](./sdd-spec-docs/feature/order-service/order-spec.md#74-payment-events-소비) · [payment-spec.md §5](./sdd-spec-docs/feature/payment-service/payment-spec.md#5-이벤트)
-- [ ] **단위 테스트 70% 이상**
+- [x] **단위 테스트 70% 이상**
 
 ---
 
