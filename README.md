@@ -12,7 +12,30 @@
 
 ---
 
+## 🎬 서비스 시연 미리보기 (Demo Preview)
+
+> 💡 *Cloudflare R2에 업로드된 GIF 이미지 링크를 아래 URL 위치에 붙여넣어 주세요.*
+
+### 1️⃣ 전체적인 홈페이지의 구조
+<!-- Cloudflare R2 GIF URL 1: 전체적인 홈페이지 구조 -->
+![전체적인 홈페이지의 구조](https://pub-b524f036811a4a299e3f34d9ebc53721.r2.dev/rtc/main_page_example.gif)
+
+---
+
+### 2️⃣ Kafka 비동기를 활용한 AI 번역
+<!-- Cloudflare R2 GIF URL 2: Kafka 비동기 AI 번역 과정 -->
+![Kafka 비동기 AI 번역](https://pub-b524f036811a4a299e3f34d9ebc53721.r2.dev/rtc/translation_pending_ex.gif)
+
+---
+
+### 3️⃣ 비동기 번역 완료 및 결과 확인
+<!-- Cloudflare R2 GIF URL 3: 비동기 번역 완료 및 다국어 메뉴/데이터 반영 확인 -->
+![비동기 번역 완료 확인](https://pub-b524f036811a4a299e3f34d9ebc53721.r2.dev/rtc/translation_complete_ex.gif)
+
+---
+
 ## 📌 목차
+- [🎬 서비스 시연 미리보기](#-서비스-시연-미리보기-demo-preview)
 1. [프로젝트 개요](#1-프로젝트-개요)
 2. [핵심 기술 아키텍처](#2-핵심-기술-아키텍처)
 3. [🔥 심층 분석: Kafka 기반 AI 비동기 번역 파이프라인](#3--심층-분석-kafka-기반-ai-비동기-번역-파이프라인)
