@@ -14,8 +14,6 @@
 
 ## 🎬 서비스 시연 미리보기 (Demo Preview)
 
-> 💡 *Cloudflare R2에 업로드된 GIF 이미지 링크를 아래 URL 위치에 붙여넣어 주세요.*
-
 ### 1️⃣ 전체적인 홈페이지의 구조
 <!-- Cloudflare R2 GIF URL 1: 전체적인 홈페이지 구조 -->
 ![전체적인 홈페이지의 구조](https://pub-b524f036811a4a299e3f34d9ebc53721.r2.dev/rtc/main_page_example.gif)
